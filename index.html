@@ -235,6 +235,7 @@ body{
 }
 .sync-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0}
 .sync-dot.err{background:#ef4444}
+.sync-dot.offline{background:#f59e0b}
 </style>
 </head>
 <body>
@@ -383,7 +384,8 @@ body{
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, doc, setDoc, collection,
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  doc, setDoc, collection,
   query, orderBy, limit, addDoc, deleteDoc,
   onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -408,7 +410,11 @@ let addType   = null;
 let histMap   = new Map(); // docId -> {id, type, localTs, by, ...}
 
 const app     = initializeApp(cfg);
-const db      = getFirestore(app);
+// Offline persistence: datele se cacheează local, dozele adăugate offline
+// se sincronizează automat când revine netul, cu timestamp-urile corecte
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 const mainRef = doc(db, "med_copil", "doze");
 const histCol = collection(db, "med_copil", "doze", "istoric");
 
@@ -534,11 +540,9 @@ onSnapshot(mainRef, snap => {
   lastIbu  = d.lastIbu  || null;
   lastPara = d.lastPara || null;
   refresh();
-  document.getElementById("syncDot").className = "sync-dot";
-  document.getElementById("syncLbl").textContent = "Sincronizat live";
+  if (navigator.onLine) setSyncStatus("ok", "Sincronizat live");
 }, err => {
-  document.getElementById("syncDot").className = "sync-dot err";
-  document.getElementById("syncLbl").textContent = "Eroare: " + err.message;
+  setSyncStatus("err", "Eroare: " + err.message);
 });
 
 const histQ = query(histCol, orderBy("localTs", "desc"), limit(50));
@@ -697,6 +701,16 @@ window.saveManualDose = async () => {
   closeAdd();
   await saveDose(typeToSave, localTs);
 };
+
+// ── ONLINE / OFFLINE indicator ──────────────────
+function setSyncStatus(state, msg) {
+  document.getElementById("syncDot").className = "sync-dot" + (state === "ok" ? "" : state === "offline" ? " offline" : " err");
+  document.getElementById("syncLbl").textContent = msg;
+}
+
+window.addEventListener("online",  () => setSyncStatus("ok", "Sincronizat live"));
+window.addEventListener("offline", () => setSyncStatus("offline", "📴 Offline — dozele se salvează local și se sync când revine netul"));
+if (!navigator.onLine) setSyncStatus("offline", "📴 Offline — dozele se salvează local și se sync când revine netul");
 
 // ── TICK every second ──────────────────────────
 setInterval(refresh, 1000);
