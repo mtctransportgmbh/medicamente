@@ -139,6 +139,10 @@ body{
 
 /* Time display */
 .time-row{margin-bottom:12px}
+.time-pre{
+  font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:#94a3b8;margin-bottom:4px;min-height:14px;
+}
 .time-big{
   font-size:2.8rem;font-weight:900;
   line-height:1;letter-spacing:-.03em;margin-bottom:3px;
@@ -324,6 +328,7 @@ body{
       <div class="badge b-none" id="ibuBadge">—</div>
     </div>
     <div class="time-row">
+      <div class="time-pre" id="ibuPre"></div>
       <div class="time-big" id="ibuBig">—</div>
       <div class="time-sub" id="ibuSub">Nicio doză înregistrată</div>
     </div>
@@ -346,6 +351,7 @@ body{
       <div class="badge b-none" id="paraBadge">—</div>
     </div>
     <div class="time-row">
+      <div class="time-pre" id="paraPre"></div>
       <div class="time-big" id="paraBig">—</div>
       <div class="time-sub" id="paraSub">Nicio doză înregistrată</div>
     </div>
@@ -482,12 +488,14 @@ function updateCard(type, lastTs) {
   const ok   = !lastTs || rem === 0;
 
   const bigEl   = document.getElementById(`${type}Big`);
+  const preEl   = document.getElementById(`${type}Pre`);
   const subEl   = document.getElementById(`${type}Sub`);
   const nextEl  = document.getElementById(`${type}Next`);
   const badgeEl = document.getElementById(`${type}Badge`);
   const btnEl   = document.getElementById(`${type}Btn`);
 
   bigEl.textContent = diff != null ? fmtElapsed(diff) : "—";
+  preEl.textContent = lastTs ? "de la ultima doză" : "";
   subEl.textContent = lastTs
     ? `ultima doză la ora ${fmtHHMM(lastTs)}`
     : "Nicio doză înregistrată";
@@ -685,8 +693,9 @@ window.saveManualDose = async () => {
   if (isNaN(localTs)) { alert("Data/ora invalidă!"); return; }
   if (localTs > Date.now() + 60_000) { alert("Nu poți adăuga doze din viitor!"); return; }
 
+  const typeToSave = addType; // salvăm înainte ca closeAdd() să reseteze addType
   closeAdd();
-  await saveDose(addType, localTs);
+  await saveDose(typeToSave, localTs);
 };
 
 // ── TICK every second ──────────────────────────
