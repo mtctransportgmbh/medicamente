@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Medicament Vladimir">
-<meta name="theme-color" content="#1d4ed8">
+<meta name="theme-color" content="#0f172a">
 <title>💊 Medicament Vladimir</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -18,7 +18,7 @@ body{
 
 /* ── OVERLAYS ── */
 .overlay{
-  position:fixed;inset:0;background:rgba(15,23,42,.6);
+  position:fixed;inset:0;background:rgba(15,23,42,.65);
   backdrop-filter:blur(4px);
   display:flex;align-items:flex-end;justify-content:center;
   z-index:100;padding:12px;
@@ -30,12 +30,11 @@ body{
   animation:up .22s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes up{from{transform:translateY(48px);opacity:0}to{transform:none;opacity:1}}
-
 .modal-icon{text-align:center;font-size:2.4rem;margin-bottom:10px}
 .modal-title{font-size:1.2rem;font-weight:800;text-align:center;margin-bottom:6px}
 .modal-sub{font-size:.88rem;color:#64748b;text-align:center;margin-bottom:22px;line-height:1.5}
 
-/* Who are you */
+/* Who */
 .who-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .who-btn{
   padding:20px 10px;border:2px solid #e2e8f0;border-radius:18px;
@@ -48,57 +47,34 @@ body{
 .who-btn.sel-ibu{border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
 .who-btn.sel-para{border-color:#d97706;background:#fffbeb;color:#b45309}
 
-/* Confirm modal */
-.confirm-text{
-  font-size:.93rem;color:#475569;text-align:center;
-  margin:0 0 22px;line-height:1.6;
-}
+/* Confirm */
+.confirm-text{font-size:.93rem;color:#475569;text-align:center;margin:0 0 22px;line-height:1.6}
 .confirm-text b{color:#0f172a}
-.time-highlight{
-  display:inline-block;background:#fef3c7;color:#92400e;
-  border-radius:8px;padding:2px 10px;font-weight:700;font-size:1.05rem;
-}
-
+.time-highlight{display:inline-block;background:#fef3c7;color:#92400e;border-radius:8px;padding:2px 10px;font-weight:700;font-size:1.05rem}
 .confirm-btns{display:flex;gap:10px}
-.btn-cancel{
-  flex:0 0 100px;padding:14px;border:none;border-radius:14px;
-  background:#f1f5f9;color:#64748b;font-size:.93rem;font-weight:700;cursor:pointer;
-}
+.btn-cancel{flex:0 0 100px;padding:14px;border:none;border-radius:14px;background:#f1f5f9;color:#64748b;font-size:.93rem;font-weight:700;cursor:pointer}
 .btn-cancel:active{background:#e2e8f0}
-.btn-ok{
-  flex:1;padding:14px;border:none;border-radius:14px;
-  color:#fff;font-size:.93rem;font-weight:800;cursor:pointer;transition:transform .1s;
-}
+.btn-ok{flex:1;padding:14px;border:none;border-radius:14px;color:#fff;font-size:.93rem;font-weight:800;cursor:pointer;transition:transform .1s}
 .btn-ok:active{transform:scale(.97)}
 .btn-ok.c-ibu{background:linear-gradient(135deg,#2563eb,#7c3aed)}
 .btn-ok.c-para{background:linear-gradient(135deg,#d97706,#dc2626)}
 .btn-ok.c-dark{background:#1e293b}
 
-/* Add manual modal extras */
-.add-section-lbl{
-  font-size:.7rem;font-weight:800;text-transform:uppercase;
-  letter-spacing:.08em;color:#94a3b8;margin:18px 0 10px;
-}
+/* Add manual */
+.add-section-lbl{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin:18px 0 10px}
 .dt-row{display:flex;gap:10px;margin-bottom:4px}
-.dt-inp{
-  flex:1;padding:13px 12px;border:2px solid #e2e8f0;border-radius:12px;
-  font-size:.95rem;color:#1e293b;background:#f8fafc;
-  font-family:inherit;outline:none;appearance:none;
-  -webkit-appearance:none;
-}
+.dt-inp{flex:1;padding:13px 12px;border:2px solid #e2e8f0;border-radius:12px;font-size:.95rem;color:#1e293b;background:#f8fafc;font-family:inherit;outline:none;-webkit-appearance:none}
 .dt-inp:focus{border-color:#94a3b8;background:#fff}
 
 /* ── HEADER ── */
 .hdr{
   background:#fff;padding:13px 18px;
   display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 1px 0 #e2e8f0;
-  position:sticky;top:0;z-index:10;
+  box-shadow:0 1px 0 #e2e8f0;position:sticky;top:0;z-index:10;
 }
 .hdr-left{display:flex;align-items:center;gap:10px}
 .hdr-title{font-size:1rem;font-weight:800;color:#0f172a;letter-spacing:-.01em}
-.hdr-sub{font-size:.68rem;color:#94a3b8;margin-top:1px}
-
+.hdr-sub{font-size:.67rem;color:#94a3b8;margin-top:1px}
 .user-pill{
   display:flex;align-items:center;gap:6px;
   background:#f1f5f9;border:none;border-radius:22px;
@@ -106,31 +82,33 @@ body{
   color:#334155;cursor:pointer;transition:background .15s;white-space:nowrap;
 }
 .user-pill:active{background:#e2e8f0}
-.user-pill .dot{
-  width:7px;height:7px;border-radius:50%;background:#22c55e;
-  box-shadow:0 0 0 2px rgba(34,197,94,.2);flex-shrink:0;
-}
+.user-pill .dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.2);flex-shrink:0}
 
-/* ── WRAP ── */
-.wrap{max-width:480px;margin:0 auto;padding:14px 14px 28px;display:flex;flex-direction:column;gap:12px}
+/* ── LAYOUT ── */
+.wrap{max-width:480px;margin:0 auto;padding:12px 12px 28px;display:flex;flex-direction:column;gap:10px}
+
+/* ── INTERVAL MODE CARD ── */
+.mode-card{background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05)}
+.mode-label{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#94a3b8;margin-bottom:8px;text-align:center}
+.mode-btns{display:flex;gap:8px}
+.mode-btn{
+  flex:1;padding:10px 8px;border:2px solid #e2e8f0;border-radius:12px;
+  font-size:.82rem;font-weight:700;cursor:pointer;background:#f8fafc;
+  color:#64748b;transition:all .15s;
+}
+.mode-btn:active{transform:scale(.97)}
+.mode-btn.sel-normal{border-color:#22c55e;background:#f0fdf4;color:#15803d}
+.mode-btn.sel-urgenta{border-color:#ef4444;background:#fef2f2;color:#dc2626}
 
 /* ── MED CARD ── */
-.card{
-  background:#fff;border-radius:22px;padding:18px 18px 16px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);
-}
+.card{background:#fff;border-radius:22px;padding:18px 18px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05)}
 .card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-.med-name{
-  font-size:1.1rem;font-weight:900;
-  display:flex;align-items:center;gap:7px;letter-spacing:-.02em;
-}
+.med-name{font-size:1.1rem;font-weight:900;display:flex;align-items:center;gap:7px;letter-spacing:-.02em}
 .med-rule{font-size:.7rem;color:#94a3b8;margin-top:3px;font-weight:500}
 
-.badge{
-  padding:5px 12px;border-radius:22px;
-  font-size:.74rem;font-weight:800;
-  white-space:nowrap;flex-shrink:0;margin-left:8px;margin-top:2px;
-}
+.badge-wrap{text-align:right;flex-shrink:0;margin-left:8px}
+.badge-pre{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:3px;white-space:nowrap;min-height:10px}
+.badge{padding:5px 12px;border-radius:22px;font-size:.74rem;font-weight:800;white-space:nowrap;display:inline-block}
 .b-ok{background:#dcfce7;color:#166534}
 .b-wait{background:#fee2e2;color:#991b1b}
 .b-none{background:#f1f5f9;color:#94a3b8}
@@ -139,23 +117,15 @@ body{
 
 /* Time display */
 .time-row{margin-bottom:12px}
-.time-pre{
-  font-size:.68rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.07em;color:#94a3b8;margin-bottom:4px;min-height:14px;
-}
-.time-big{
-  font-size:2.8rem;font-weight:900;
-  line-height:1;letter-spacing:-.03em;margin-bottom:3px;
-}
+.time-pre{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px;min-height:14px}
+.time-big{font-size:2.8rem;font-weight:900;line-height:1;letter-spacing:-.03em;margin-bottom:3px}
 .c-ibu .time-big{color:#1d4ed8}
 .c-para .time-big{color:#b45309}
 .time-sub{font-size:.75rem;color:#94a3b8;font-weight:500}
 
 .time-next{
-  display:flex;align-items:center;gap:6px;
-  font-size:.85rem;font-weight:600;
-  padding:9px 12px;border-radius:12px;
-  margin-bottom:14px;min-height:38px;
+  display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;
+  padding:9px 12px;border-radius:12px;margin-bottom:14px;min-height:38px;
   font-variant-numeric:tabular-nums;
 }
 .tn-ok{background:#f0fdf4;color:#15803d}
@@ -163,7 +133,6 @@ body{
 .tn-none{background:#f8fafc;color:#94a3b8}
 
 .card-div{height:1px;background:#f1f5f9;margin-bottom:14px}
-
 .mark-btn{
   width:100%;padding:16px;border:none;border-radius:16px;
   font-size:.97rem;font-weight:800;cursor:pointer;color:#fff;
@@ -171,45 +140,44 @@ body{
   display:flex;align-items:center;justify-content:center;gap:8px;
 }
 .mark-btn:active{transform:scale(.97)}
-.c-ibu .mark-btn{
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
-  box-shadow:0 4px 14px rgba(37,99,235,.35);
-}
-.c-para .mark-btn{
-  background:linear-gradient(135deg,#d97706,#dc2626);
-  box-shadow:0 4px 14px rgba(217,119,6,.35);
-}
-.mark-btn.early{
-  background:#fff !important;box-shadow:none !important;
-  border:2px dashed;font-weight:700;
-}
+.c-ibu .mark-btn{background:linear-gradient(135deg,#2563eb,#7c3aed);box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.c-para .mark-btn{background:linear-gradient(135deg,#d97706,#dc2626);box-shadow:0 4px 14px rgba(217,119,6,.35)}
+.mark-btn.early{background:#fff !important;box-shadow:none !important;border:2px dashed;font-weight:700}
 .c-ibu .mark-btn.early{color:#2563eb;border-color:#93c5fd}
 .c-para .mark-btn.early{color:#b45309;border-color:#fcd34d}
 
+/* ── TABS ── */
+.tab-bar{
+  display:flex;background:#fff;border-radius:18px;padding:4px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);gap:4px;
+}
+.tab-btn{
+  flex:1;padding:11px;border:none;border-radius:14px;
+  font-size:.85rem;font-weight:700;cursor:pointer;
+  color:#94a3b8;background:none;transition:all .2s;
+}
+.tab-btn.tab-active{background:#0f172a;color:#fff}
+
+/* ── PANELS ── */
+.panel{display:flex;flex-direction:column;gap:10px}
+.panel.hidden{display:none}
+
 /* ── HISTORY ── */
-.hist-card{
-  background:#fff;border-radius:22px;padding:18px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);
-}
-.hist-header{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;
-}
-.section-lbl{
-  font-size:.68rem;font-weight:800;text-transform:uppercase;
-  letter-spacing:.1em;color:#94a3b8;
-}
-.add-hist-btn{
-  display:flex;align-items:center;gap:5px;
-  background:#f1f5f9;border:none;border-radius:14px;
-  padding:6px 12px;font-size:.78rem;font-weight:700;
-  color:#334155;cursor:pointer;transition:background .15s;
-}
+.hist-card{background:#fff;border-radius:22px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05)}
+.hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-lbl{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8}
+.add-hist-btn{display:flex;align-items:center;gap:5px;background:#f1f5f9;border:none;border-radius:14px;padding:6px 12px;font-size:.78rem;font-weight:700;color:#334155;cursor:pointer;transition:background .15s}
 .add-hist-btn:active{background:#e2e8f0}
 
-.hist-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 0;border-bottom:1px solid #f1f5f9;
+.month-group{margin-bottom:2px}
+.month-hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0 8px;border-bottom:2px solid #f1f5f9;margin-bottom:2px;
 }
+.month-hdr-name{font-size:.8rem;font-weight:900;color:#334155}
+.month-hdr-count{font-size:.7rem;color:#94a3b8;background:#f1f5f9;padding:2px 9px;border-radius:10px;font-weight:700}
+
+.hist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f8fafc}
 .hist-item:last-child{border-bottom:none}
 .hdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .ibu-dot{background:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
@@ -217,22 +185,45 @@ body{
 .hinfo{flex:1;min-width:0}
 .hname{font-size:.87rem;font-weight:700;color:#1e293b}
 .hby{font-size:.7rem;color:#94a3b8;margin-top:1px}
+.manual-tag{font-size:.65rem;color:#94a3b8;font-weight:400}
 .htime{font-size:.77rem;color:#94a3b8;flex-shrink:0}
-.del-btn{
-  background:none;border:none;font-size:.95rem;
-  cursor:pointer;padding:5px 6px;border-radius:8px;
-  opacity:.35;transition:opacity .15s,background .15s;flex-shrink:0;
-  margin-left:2px;
-}
+.del-btn{background:none;border:none;font-size:.95rem;cursor:pointer;padding:5px 6px;border-radius:8px;opacity:.3;transition:opacity .15s,background .15s;flex-shrink:0}
 .del-btn:active{opacity:1;background:#fee2e2}
-
 .empty-h{text-align:center;color:#cbd5e1;padding:22px 0;font-size:.88rem}
 
+/* ── STATISTICS ── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{background:#f8fafc;border-radius:16px;padding:16px 12px;text-align:center}
+.stat-num{font-size:1.7rem;font-weight:900;color:#0f172a;margin-bottom:4px;line-height:1}
+.stat-lbl{font-size:.66rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+
+.stat-card{background:#fff;border-radius:22px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05)}
+.stat-card-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:14px}
+
+/* Chart */
+.month-chart{display:flex;flex-direction:column;gap:9px}
+.chart-row{display:flex;align-items:center;gap:8px}
+.chart-lbl{font-size:.72rem;color:#64748b;width:65px;flex-shrink:0}
+.chart-bar-wrap{flex:1;background:#f1f5f9;border-radius:6px;height:14px;overflow:hidden}
+.chart-bar{height:100%;border-radius:6px;min-width:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.chart-bar.ibu-bar{background:linear-gradient(90deg,#2563eb,#7c3aed)}
+.chart-bar.mixed-bar{background:linear-gradient(90deg,#d97706,#7c3aed)}
+.chart-val{font-size:.75rem;font-weight:800;color:#334155;width:20px;text-align:right;flex-shrink:0}
+
+/* Episodes */
+.episode-item{padding:12px 0;border-bottom:1px solid #f1f5f9}
+.episode-item:last-child{border-bottom:none}
+.ep-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.ep-date{font-size:.9rem;font-weight:800;color:#0f172a}
+.ep-dur{font-size:.7rem;color:#94a3b8;margin-top:2px}
+.ep-gap{font-size:.7rem;font-weight:700;color:#22c55e;text-align:right;padding-top:2px}
+.ep-badges{display:flex;gap:6px;flex-wrap:wrap}
+.ep-badge{padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700}
+.ep-ibu{background:#eff6ff;color:#1d4ed8}
+.ep-para{background:#fffbeb;color:#b45309}
+
 /* ── FOOTER ── */
-.footer{
-  text-align:center;font-size:.68rem;color:#cbd5e1;padding-bottom:4px;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
+.footer{text-align:center;font-size:.68rem;color:#cbd5e1;padding-bottom:4px;display:flex;align-items:center;justify-content:center;gap:6px}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0}
 .sync-dot.err{background:#ef4444}
 .sync-dot.offline{background:#f59e0b}
@@ -245,19 +236,15 @@ body{
   <div class="modal">
     <div class="modal-icon">👶</div>
     <div class="modal-title">Cine ești pe acest telefon?</div>
-    <div class="modal-sub">Se salvează local pe dispozitiv, ca să apară în istoricul dozelor.</div>
+    <div class="modal-sub">Se salvează local, apare în istoricul dozelor.</div>
     <div class="who-btns">
-      <button class="who-btn" onclick="setUser('Tată')">
-        <span class="icon">👨</span>Tată
-      </button>
-      <button class="who-btn" onclick="setUser('Mamă')">
-        <span class="icon">👩</span>Mamă
-      </button>
+      <button class="who-btn" onclick="setUser('Tată')"><span class="icon">👨</span>Tată</button>
+      <button class="who-btn" onclick="setUser('Mamă')"><span class="icon">👩</span>Mamă</button>
     </div>
   </div>
 </div>
 
-<!-- ── CONFIRM DAR DEVREME ── -->
+<!-- ── CONFIRM DEVREME ── -->
 <div class="overlay hidden" id="confirmModal">
   <div class="modal">
     <div class="modal-icon">⚠️</div>
@@ -276,22 +263,15 @@ body{
     <div class="modal-icon">📝</div>
     <div class="modal-title">Adaugă doză din trecut</div>
     <div class="modal-sub">Selectează medicamentul și ora exactă</div>
-
     <div class="who-btns">
-      <button class="who-btn" id="addIbuBtn" onclick="selectAddMed('ibu')">
-        <span class="icon">💙</span>Ibuprofen
-      </button>
-      <button class="who-btn" id="addParaBtn" onclick="selectAddMed('para')">
-        <span class="icon">🟡</span>Paracetamol
-      </button>
+      <button class="who-btn" id="addIbuBtn" onclick="selectAddMed('ibu')"><span class="icon">💙</span>Ibuprofen</button>
+      <button class="who-btn" id="addParaBtn" onclick="selectAddMed('para')"><span class="icon">🟡</span>Paracetamol</button>
     </div>
-
     <div class="add-section-lbl">Data și ora dozei</div>
     <div class="dt-row">
       <input class="dt-inp" type="date" id="addDate">
       <input class="dt-inp" type="time" id="addTime">
     </div>
-
     <div style="margin-top:20px">
       <div class="confirm-btns">
         <button class="btn-cancel" onclick="closeAdd()">Anulează</button>
@@ -316,81 +296,103 @@ body{
   </button>
 </div>
 
-<!-- ── MAIN ── -->
 <div class="wrap">
 
-  <!-- IBUPROFEN -->
+  <!-- INTERVAL MODE -->
+  <div class="mode-card">
+    <div class="mode-label">Mod interval doze</div>
+    <div class="mode-btns">
+      <button class="mode-btn" id="btnNormal" onclick="setIntervalMode('normal')">🕐 Normal — 8 ore</button>
+      <button class="mode-btn" id="btnUrgenta" onclick="setIntervalMode('urgenta')">⚡ Urgență — 6 ore</button>
+    </div>
+  </div>
+
+  <!-- IBUPROFEN CARD -->
   <div class="card c-ibu">
     <div class="card-head">
       <div>
         <div class="med-name"><span style="font-size:1.2rem">💙</span>Ibuprofen</div>
-        <div class="med-rule">Interval minim: 6 ore între doze</div>
+        <div class="med-rule" id="ibuRule">Interval: 8 ore</div>
       </div>
-      <div class="badge b-none" id="ibuBadge">—</div>
+      <div class="badge-wrap">
+        <div class="badge-pre" id="ibuBadgePre"></div>
+        <div class="badge b-none" id="ibuBadge">—</div>
+      </div>
     </div>
     <div class="time-row">
       <div class="time-pre" id="ibuPre"></div>
       <div class="time-big" id="ibuBig">—</div>
       <div class="time-sub" id="ibuSub">Nicio doză înregistrată</div>
     </div>
-    <div class="time-next tn-none" id="ibuNext">
-      <span>Apasă butonul când dai prima doză</span>
-    </div>
+    <div class="time-next tn-none" id="ibuNext"><span>Apasă butonul când dai prima doză</span></div>
     <div class="card-div"></div>
     <button class="mark-btn" id="ibuBtn" onclick="markDose('ibu')">
       <span style="font-size:1.1rem">✓</span>Marchează Ibuprofen
     </button>
   </div>
 
-  <!-- PARACETAMOL -->
+  <!-- PARACETAMOL CARD -->
   <div class="card c-para">
     <div class="card-head">
       <div>
         <div class="med-name"><span style="font-size:1.2rem">🟡</span>Paracetamol</div>
-        <div class="med-rule">Interval minim: 6 ore între doze</div>
+        <div class="med-rule" id="paraRule">Interval: 8 ore</div>
       </div>
-      <div class="badge b-none" id="paraBadge">—</div>
+      <div class="badge-wrap">
+        <div class="badge-pre" id="paraBadgePre"></div>
+        <div class="badge b-none" id="paraBadge">—</div>
+      </div>
     </div>
     <div class="time-row">
       <div class="time-pre" id="paraPre"></div>
       <div class="time-big" id="paraBig">—</div>
       <div class="time-sub" id="paraSub">Nicio doză înregistrată</div>
     </div>
-    <div class="time-next tn-none" id="paraNext">
-      <span>Apasă butonul când dai prima doză</span>
-    </div>
+    <div class="time-next tn-none" id="paraNext"><span>Apasă butonul când dai prima doză</span></div>
     <div class="card-div"></div>
     <button class="mark-btn" id="paraBtn" onclick="markDose('para')">
       <span style="font-size:1.1rem">✓</span>Marchează Paracetamol
     </button>
   </div>
 
-  <!-- HISTORY -->
-  <div class="hist-card">
-    <div class="hist-header">
-      <div class="section-lbl">Ultimele doze</div>
-      <button class="add-hist-btn" onclick="openAdd()">＋ Adaugă manual</button>
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn tab-active" id="tabDoze" onclick="switchTab('doze')">📋 Doze</button>
+    <button class="tab-btn" id="tabStat" onclick="switchTab('stat')">📊 Statistici</button>
+  </div>
+
+  <!-- DOZE PANEL -->
+  <div class="panel" id="panelDoze">
+    <div class="hist-card">
+      <div class="hist-header">
+        <div class="section-lbl">Istoric doze</div>
+        <button class="add-hist-btn" onclick="openAdd()">＋ Adaugă manual</button>
+      </div>
+      <div id="histList"><div class="empty-h">Nicio doză înregistrată încă</div></div>
     </div>
-    <div id="histList"><div class="empty-h">Nicio doză înregistrată încă</div></div>
+  </div>
+
+  <!-- STATISTICI PANEL -->
+  <div class="panel hidden" id="panelStat">
+    <div id="statContent"><div class="empty-h" style="padding:40px 0">Se calculează...</div></div>
   </div>
 
   <div class="footer">
     <div class="sync-dot" id="syncDot"></div>
-    <span id="syncLbl">Se conectează la Firebase...</span>
+    <span id="syncLbl">Se conectează...</span>
   </div>
 
-</div>
+</div><!-- end wrap -->
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
-  doc, setDoc, collection,
-  query, orderBy, limit, addDoc, deleteDoc,
-  onSnapshot, serverTimestamp
+  doc, setDoc, collection, query, orderBy, limit,
+  addDoc, deleteDoc, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ════════════════════════════════════════════════
+// ════════════════════════════════════════════
 const cfg = {
   apiKey:            "AIzaSyA1uIWWXUFU2T2IjeoBL5zYUfZAqQKMjO8",
   authDomain:        "medicamente-3ed4a.firebaseapp.com",
@@ -399,33 +401,40 @@ const cfg = {
   messagingSenderId: "532379249934",
   appId:             "1:532379249934:web:0b542b33802b583b03bb5f"
 };
-// ════════════════════════════════════════════════
+// ════════════════════════════════════════════
 
-const INTERVAL_MS = 6 * 3_600_000; // 6 ore pentru ambele medicamente
+const INTERVAL_NORMAL  = 8 * 3_600_000;  // 8 ore
+const INTERVAL_URGENTA = 6 * 3_600_000;  // 6 ore
+const EPISODE_GAP      = 48 * 3_600_000; // 48h = episod nou de febră
+
+let INTERVAL_MS = INTERVAL_NORMAL;
 
 let lastIbu   = null;
 let lastPara  = null;
 let pendingType = null;
 let addType   = null;
-let histMap   = new Map(); // docId -> {id, type, localTs, by, ...}
+let histMap   = new Map();
+let activeTab = 'doze';
 
-const app     = initializeApp(cfg);
-// Offline persistence: datele se cacheează local, dozele adăugate offline
-// se sincronizează automat când revine netul, cu timestamp-urile corecte
-const db = initializeFirestore(app, {
+const app = initializeApp(cfg);
+const db  = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 });
 const mainRef = doc(db, "med_copil", "doze");
 const histCol = collection(db, "med_copil", "doze", "istoric");
 
-// ── USER ───────────────────────────────────────
+// ── CONSTANTE LIMBĂ ─────────────────────────────
+const MONTHS      = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','nov','dec'];
+const MONTHS_FULL = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+const pad2 = n => String(n).padStart(2, "0");
+
+// ── USER ────────────────────────────────────────
 let me = localStorage.getItem("medcopil_user");
 if (me) {
   document.getElementById("whoModal").classList.add("hidden");
   document.getElementById("uName").textContent = me;
 }
-
-window.setUser = (name) => {
+window.setUser = name => {
   me = name;
   localStorage.setItem("medcopil_user", name);
   document.getElementById("uName").textContent = name;
@@ -433,39 +442,78 @@ window.setUser = (name) => {
 };
 window.changeUser = () => document.getElementById("whoModal").classList.remove("hidden");
 
-// ── FORMATTERS ─────────────────────────────────
-const pad2 = n => String(n).padStart(2, "0");
+// ── INTERVAL MODE ────────────────────────────────
+let intervalMode = localStorage.getItem('medcopil_interval') || 'normal';
+function applyIntervalMode(mode) {
+  intervalMode = mode;
+  INTERVAL_MS  = mode === 'urgenta' ? INTERVAL_URGENTA : INTERVAL_NORMAL;
+  localStorage.setItem('medcopil_interval', mode);
+  const label = mode === 'urgenta' ? '6 ore' : '8 ore';
+  document.getElementById('btnNormal').className   = 'mode-btn' + (mode === 'normal'   ? ' sel-normal'  : '');
+  document.getElementById('btnUrgenta').className  = 'mode-btn' + (mode === 'urgenta'  ? ' sel-urgenta' : '');
+  document.getElementById('ibuRule').textContent   = `Interval: ${label}`;
+  document.getElementById('paraRule').textContent  = `Interval: ${label}`;
+  refresh();
+}
+window.setIntervalMode = mode => applyIntervalMode(mode);
+applyIntervalMode(intervalMode);
 
+// ── TABS ────────────────────────────────────────
+window.switchTab = tab => {
+  activeTab = tab;
+  document.getElementById('tabDoze').classList.toggle('tab-active', tab === 'doze');
+  document.getElementById('tabStat').classList.toggle('tab-active', tab === 'stat');
+  document.getElementById('panelDoze').classList.toggle('hidden', tab !== 'doze');
+  document.getElementById('panelStat').classList.toggle('hidden', tab !== 'stat');
+  if (tab === 'stat') renderStats();
+};
+
+// ── FORMATTERS ───────────────────────────────────
 function fmtElapsed(ms) {
-  // Big display: hours + minutes (no seconds - stays readable)
   if (ms == null) return "—";
-  const m   = Math.floor(ms / 60_000);
-  const h   = Math.floor(m / 60);
-  const min = m % 60;
-  if (h === 0 && min === 0) return "<1min";
-  if (h === 0) return `${min}min`;
-  if (min === 0) return `${h}h`;
-  return `${h}h ${min}min`;
+  const totalMin   = Math.floor(ms / 60_000);
+  const totalHours = Math.floor(totalMin / 60);
+  const days       = Math.floor(totalHours / 24);
+
+  if (days >= 365) {
+    const y = Math.floor(days / 365);
+    const m = Math.floor((days - y * 365) / 30);
+    const yStr = y === 1 ? "1 an" : `${y} ani`;
+    return m > 0 ? `${yStr} ${m} luni` : yStr;
+  }
+  if (days >= 60) {
+    const m = Math.floor(days / 30);
+    return m === 1 ? "1 lună" : `${m} luni`;
+  }
+  if (days >= 14) {
+    const w = Math.floor(days / 7);
+    return w === 1 ? "1 săpt" : `${w} săpt`;
+  }
+  if (days > 0) {
+    const h = totalHours % 24;
+    const dStr = days === 1 ? "1 zi" : `${days} zile`;
+    return h > 0 ? `${dStr} ${h}h` : dStr;
+  }
+  if (totalHours === 0) return totalMin === 0 ? "<1min" : `${totalMin}min`;
+  const mins = totalMin % 60;
+  return mins === 0 ? `${totalHours}h` : `${totalHours}h ${mins}min`;
 }
 
 function fmtCountdownShort(ms) {
-  // Badge: compact, no seconds
   if (ms <= 0) return null;
-  const m   = Math.floor(ms / 60_000);
-  const h   = Math.floor(m / 60);
-  const min = m % 60;
+  const m = Math.floor(ms / 60_000);
+  const h = Math.floor(m / 60); const min = m % 60;
   if (h === 0) return `${min}min`;
   if (min === 0) return `${h}h`;
   return `${h}h ${min}m`;
 }
 
 function fmtCountdownFull(ms) {
-  // Next-row: full with seconds ticking
   if (ms <= 0) return null;
-  const totalSec = Math.floor(ms / 1000);
-  const h   = Math.floor(totalSec / 3600);
-  const min = Math.floor((totalSec % 3600) / 60);
-  const sec = totalSec % 60;
+  const s   = Math.floor(ms / 1000);
+  const h   = Math.floor(s / 3600);
+  const min = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
   if (h > 0)   return `${h}h ${min}min ${pad2(sec)}s`;
   if (min > 0) return `${min}min ${pad2(sec)}s`;
   return `${pad2(sec)}s`;
@@ -476,42 +524,75 @@ function fmtHHMM(ts) {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
-function fmtHistDate(ts) {
+function fmtLastDoseLabel(ts) {
   const d   = new Date(ts);
   const now = new Date();
-  const time = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  const time = fmtHHMM(ts);
+  if (d.toDateString() === now.toDateString()) return `la ora ${time}`;
+  const yest = new Date(now); yest.setDate(now.getDate() - 1);
+  if (d.toDateString() === yest.toDateString()) return `ieri la ${time}`;
+  const yr = d.getFullYear() !== now.getFullYear() ? ` ${d.getFullYear()}` : '';
+  return `pe ${d.getDate()} ${MONTHS[d.getMonth()]}${yr} la ${time}`;
+}
+
+function fmtDayTime(ts) {
+  // În cadrul grupului lunar, arătăm ziua + ora
+  const d   = new Date(ts);
+  const now = new Date();
+  const time = fmtHHMM(ts);
   if (d.toDateString() === now.toDateString()) return `azi ${time}`;
   const yest = new Date(now); yest.setDate(now.getDate() - 1);
   if (d.toDateString() === yest.toDateString()) return `ieri ${time}`;
-  return `${d.getDate()}.${d.getMonth()+1} ${time}`;
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${time}`;
 }
 
-// ── CARD UPDATE ────────────────────────────────
+function fmtDays(ms) {
+  const d = Math.round(ms / 86_400_000);
+  if (d === 0) return '<1 zi';
+  if (d === 1) return '1 zi';
+  if (d < 14)  return `${d} zile`;
+  if (d < 60)  return `${Math.round(d/7)} săpt`;
+  if (d < 365) return `${Math.round(d/30)} luni`;
+  const y = Math.floor(d/365);
+  return y === 1 ? '~1 an' : `~${y} ani`;
+}
+
+function fmtEpisodeDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const time = fmtHHMM(ts);
+  if (d.toDateString() === now.toDateString()) return `azi ${time}`;
+  const yr = d.getFullYear() !== now.getFullYear() ? ` ${d.getFullYear()}` : '';
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}${yr}`;
+}
+
+// ── CARD UPDATE ──────────────────────────────────
 function updateCard(type, lastTs) {
   const now  = Date.now();
   const diff = lastTs ? now - lastTs : null;
   const rem  = lastTs ? Math.max(0, INTERVAL_MS - (now - lastTs)) : 0;
   const ok   = !lastTs || rem === 0;
 
-  const bigEl   = document.getElementById(`${type}Big`);
-  const preEl   = document.getElementById(`${type}Pre`);
-  const subEl   = document.getElementById(`${type}Sub`);
-  const nextEl  = document.getElementById(`${type}Next`);
-  const badgeEl = document.getElementById(`${type}Badge`);
-  const btnEl   = document.getElementById(`${type}Btn`);
+  const bigEl      = document.getElementById(`${type}Big`);
+  const preEl      = document.getElementById(`${type}Pre`);
+  const subEl      = document.getElementById(`${type}Sub`);
+  const nextEl     = document.getElementById(`${type}Next`);
+  const badgeEl    = document.getElementById(`${type}Badge`);
+  const badgePreEl = document.getElementById(`${type}BadgePre`);
+  const btnEl      = document.getElementById(`${type}Btn`);
 
   bigEl.textContent = diff != null ? fmtElapsed(diff) : "—";
   preEl.textContent = lastTs ? "de la ultima doză" : "";
-  subEl.textContent = lastTs
-    ? `ultima doză la ora ${fmtHHMM(lastTs)}`
-    : "Nicio doză înregistrată";
+  subEl.textContent = lastTs ? `ultima doză ${fmtLastDoseLabel(lastTs)}` : "Nicio doză înregistrată";
 
   if (!lastTs) {
+    badgePreEl.textContent = "";
     badgeEl.className   = "badge b-none";
     badgeEl.textContent = "—";
     nextEl.className    = "time-next tn-none";
     nextEl.innerHTML    = "<span>Apasă butonul când dai prima doză</span>";
   } else if (ok) {
+    badgePreEl.textContent = "";
     badgeEl.className   = "badge b-ok pulse";
     badgeEl.textContent = "✓ Poți da";
     nextEl.className    = "time-next tn-ok";
@@ -520,6 +601,7 @@ function updateCard(type, lastTs) {
     const short = fmtCountdownShort(rem);
     const full  = fmtCountdownFull(rem);
     const at    = fmtHHMM(lastTs + INTERVAL_MS);
+    badgePreEl.textContent = "timp rămas";
     badgeEl.className   = "badge b-wait";
     badgeEl.textContent = `⏳ ${short}`;
     nextEl.className    = "time-next tn-wait";
@@ -534,18 +616,16 @@ function refresh() {
   updateCard("para", lastPara);
 }
 
-// ── FIREBASE LISTENERS ──────────────────────────
+// ── FIREBASE LISTENERS ───────────────────────────
 onSnapshot(mainRef, snap => {
   const d  = snap.exists() ? snap.data() : {};
   lastIbu  = d.lastIbu  || null;
   lastPara = d.lastPara || null;
   refresh();
   if (navigator.onLine) setSyncStatus("ok", "Sincronizat live");
-}, err => {
-  setSyncStatus("err", "Eroare: " + err.message);
-});
+}, err => setSyncStatus("err", "Eroare: " + err.message));
 
-const histQ = query(histCol, orderBy("localTs", "desc"), limit(50));
+const histQ = query(histCol, orderBy("localTs", "desc"), limit(300));
 onSnapshot(histQ, snap => {
   histMap.clear();
   snap.docs.forEach(d => {
@@ -554,89 +634,218 @@ onSnapshot(histQ, snap => {
     histMap.set(d.id, { ...data, id: d.id, localTs: ts });
   });
   renderHistory();
+  if (activeTab === 'stat') renderStats();
 });
 
+// ── ONLINE/OFFLINE ───────────────────────────────
+function setSyncStatus(state, msg) {
+  document.getElementById("syncDot").className = "sync-dot" +
+    (state === "ok" ? "" : state === "offline" ? " offline" : " err");
+  document.getElementById("syncLbl").textContent = msg;
+}
+window.addEventListener("online",  () => setSyncStatus("ok", "Sincronizat live"));
+window.addEventListener("offline", () => setSyncStatus("offline", "📴 Offline — dozele se salvează local"));
+if (!navigator.onLine) setSyncStatus("offline", "📴 Offline — dozele se salvează local");
+
+// ── RENDER HISTORY (grupat pe luni) ──────────────
 function renderHistory() {
   const el = document.getElementById("histList");
   if (histMap.size === 0) {
     el.innerHTML = '<div class="empty-h">Nicio doză înregistrată încă</div>';
     return;
   }
-  const sorted = [...histMap.values()].sort((a, b) => b.localTs - a.localTs).slice(0, 20);
-  el.innerHTML = sorted.map(it => {
-    const isIbu    = it.type === "ibu";
-    const timeStr  = fmtHistDate(it.localTs);
-    const manualBadge = it.manual ? ' <span style="font-size:.65rem;color:#94a3b8">(manual)</span>' : '';
-    return `
-      <div class="hist-item">
-        <div class="hdot ${isIbu ? "ibu-dot" : "para-dot"}"></div>
-        <div class="hinfo">
-          <div class="hname">${isIbu ? "Ibuprofen" : "Paracetamol"}${manualBadge}</div>
-          ${it.by ? `<div class="hby">dat de ${it.by}</div>` : ""}
-        </div>
-        <div class="htime">${timeStr}</div>
-        <button class="del-btn" onclick="deleteDose('${it.id}')" title="Șterge">🗑️</button>
-      </div>`;
-  }).join("");
+
+  const sorted = [...histMap.values()].sort((a, b) => b.localTs - a.localTs);
+
+  // Grupare pe an-lună
+  const groups = new Map();
+  for (const item of sorted) {
+    const d   = new Date(item.localTs);
+    const key = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+    if (!groups.has(key)) groups.set(key, { year: d.getFullYear(), month: d.getMonth(), items: [] });
+    groups.get(key).items.push(item);
+  }
+
+  el.innerHTML = [...groups.values()].map(grp => `
+    <div class="month-group">
+      <div class="month-hdr">
+        <span class="month-hdr-name">${MONTHS_FULL[grp.month]} ${grp.year}</span>
+        <span class="month-hdr-count">${grp.items.length} ${grp.items.length === 1 ? 'doză' : 'doze'}</span>
+      </div>
+      ${grp.items.map(it => `
+        <div class="hist-item">
+          <div class="hdot ${it.type === 'ibu' ? 'ibu-dot' : 'para-dot'}"></div>
+          <div class="hinfo">
+            <div class="hname">${it.type === 'ibu' ? 'Ibuprofen' : 'Paracetamol'}
+              ${it.manual ? '<span class="manual-tag"> (manual)</span>' : ''}</div>
+            ${it.by ? `<div class="hby">dat de ${it.by}</div>` : ''}
+          </div>
+          <div class="htime">${fmtDayTime(it.localTs)}</div>
+          <button class="del-btn" onclick="deleteDose('${it.id}')" title="Șterge">🗑️</button>
+        </div>`).join('')}
+    </div>`).join('');
 }
 
-// ── SAVE DOSE ──────────────────────────────────
+// ── COMPUTE EPISODES ─────────────────────────────
+function computeEpisodes() {
+  if (histMap.size === 0) return [];
+  const sorted = [...histMap.values()].sort((a, b) => a.localTs - b.localTs);
+  const eps = [];
+  let cur = null;
+  for (const dose of sorted) {
+    if (!cur || dose.localTs - cur.lastTs > EPISODE_GAP) {
+      cur = { startTs: dose.localTs, lastTs: dose.localTs, doses: [dose] };
+      eps.push(cur);
+    } else {
+      cur.lastTs = dose.localTs;
+      cur.doses.push(dose);
+    }
+  }
+  return eps;
+}
+
+// ── RENDER STATS ─────────────────────────────────
+function renderStats() {
+  const el  = document.getElementById("statContent");
+  const eps = computeEpisodes();
+
+  if (eps.length === 0) {
+    el.innerHTML = '<div class="empty-h" style="padding:40px 0">Nu sunt suficiente date pentru statistici</div>';
+    return;
+  }
+
+  // Gaps between episodes (from end of one to start of next)
+  const gaps = eps.slice(1).map((ep, i) => ep.startTs - eps[i].lastTs);
+  const avgGap = gaps.length > 0 ? gaps.reduce((s, g) => s + g, 0) / gaps.length : null;
+  const minGap = gaps.length > 0 ? Math.min(...gaps) : null;
+  const maxGap = gaps.length > 0 ? Math.max(...gaps) : null;
+
+  // Total doze
+  const totalDoses = [...histMap.values()].length;
+
+  // Monthly episodes map
+  const monthMap = {};
+  for (const ep of eps) {
+    const d   = new Date(ep.startTs);
+    const key = `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+    if (!monthMap[key]) monthMap[key] = { year: d.getFullYear(), month: d.getMonth(), count: 0 };
+    monthMap[key].count++;
+  }
+  const monthKeys    = Object.keys(monthMap).sort().reverse().slice(0, 18);
+  const maxMonthCnt  = Math.max(...monthKeys.map(k => monthMap[k].count), 1);
+
+  // Reversed episodes for display
+  const epsReversed = [...eps].reverse();
+
+  el.innerHTML = `
+    <!-- Summary metrics -->
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-num">${eps.length}</div>
+        <div class="stat-lbl">episoade febră</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${totalDoses}</div>
+        <div class="stat-lbl">doze totale</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${avgGap ? fmtDays(avgGap) : '—'}</div>
+        <div class="stat-lbl">interval mediu</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${minGap ? fmtDays(minGap) : '—'}</div>
+        <div class="stat-lbl">cel mai des</div>
+      </div>
+    </div>
+
+    ${maxGap ? `
+    <div class="stat-box" style="background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:.75rem;color:#64748b;font-weight:700">Cel mai lung interval fără febră</span>
+      <span style="font-size:1.1rem;font-weight:900;color:#0f172a">${fmtDays(maxGap)}</span>
+    </div>` : ''}
+
+    <!-- Chart pe luni -->
+    ${monthKeys.length > 0 ? `
+    <div class="stat-card">
+      <div class="stat-card-title">📅 Episoade pe luni</div>
+      <div class="month-chart">
+        ${monthKeys.map(k => {
+          const g   = monthMap[k];
+          const pct = Math.round((g.count / maxMonthCnt) * 100);
+          return `
+            <div class="chart-row">
+              <div class="chart-lbl">${MONTHS[g.month]} ${g.year}</div>
+              <div class="chart-bar-wrap">
+                <div class="chart-bar mixed-bar" style="width:${Math.max(pct,4)}%"></div>
+              </div>
+              <div class="chart-val">${g.count}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- Lista episoade -->
+    <div class="stat-card">
+      <div class="stat-card-title">🤒 Episoade de febră (${eps.length})</div>
+      ${epsReversed.map((ep, di) => {
+        const origIdx   = eps.length - 1 - di;
+        const gapFromPrev = origIdx > 0 ? ep.startTs - eps[origIdx - 1].lastTs : null;
+        const durMs     = ep.lastTs - ep.startTs;
+        const durStr    = durMs < 3_600_000 ? 'sub 1h' : fmtElapsed(durMs);
+        const ibuCnt    = ep.doses.filter(d => d.type === 'ibu').length;
+        const paraCnt   = ep.doses.filter(d => d.type === 'para').length;
+        const endSame   = new Date(ep.startTs).toDateString() === new Date(ep.lastTs).toDateString();
+        const dateRange = durMs < 60_000
+          ? fmtEpisodeDate(ep.startTs)
+          : endSame
+            ? `${fmtEpisodeDate(ep.startTs)} (${durStr})`
+            : `${fmtEpisodeDate(ep.startTs)} → ${fmtEpisodeDate(ep.lastTs)} (${durStr})`;
+
+        return `
+          <div class="episode-item">
+            <div class="ep-row">
+              <div>
+                <div class="ep-date">${dateRange}</div>
+                <div class="ep-dur">${ep.doses.length} doze</div>
+              </div>
+              ${gapFromPrev ? `<div class="ep-gap">+${fmtDays(gapFromPrev)} față de anterior</div>` : '<div class="ep-gap" style="color:#94a3b8">primul episod</div>'}
+            </div>
+            <div class="ep-badges">
+              ${ibuCnt  > 0 ? `<span class="ep-badge ep-ibu">💙 Ibuprofen ×${ibuCnt}</span>`  : ''}
+              ${paraCnt > 0 ? `<span class="ep-badge ep-para">🟡 Paracetamol ×${paraCnt}</span>` : ''}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── SAVE DOSE ────────────────────────────────────
 async function saveDose(type, ts) {
   const localTs = ts || Date.now();
-  await addDoc(histCol, { type, ts: serverTimestamp(), localTs, by: me || null });
-
-  // Update mainRef only if this is the most recent dose of this type
+  await addDoc(histCol, { type, ts: serverTimestamp(), localTs, by: me || null,
+    ...(ts ? { manual: true } : {}) });
   const currentLast = type === "ibu" ? lastIbu : lastPara;
   if (!currentLast || localTs > currentLast) {
-    await setDoc(mainRef,
-      type === "ibu" ? { lastIbu: localTs } : { lastPara: localTs },
-      { merge: true }
-    );
+    await setDoc(mainRef, type === "ibu" ? { lastIbu: localTs } : { lastPara: localTs }, { merge: true });
   }
 }
 
-// ── RECOMPUTE after delete ──────────────────────
 async function recomputeLast(type) {
   const items = [...histMap.values()].filter(h => h.type === type);
-  const newLast = items.length > 0
-    ? Math.max(...items.map(h => h.localTs || 0))
-    : null;
-  await setDoc(mainRef,
-    type === "ibu" ? { lastIbu: newLast } : { lastPara: newLast },
-    { merge: true }
-  );
+  const newLast = items.length > 0 ? Math.max(...items.map(h => h.localTs || 0)) : null;
+  await setDoc(mainRef, type === "ibu" ? { lastIbu: newLast } : { lastPara: newLast }, { merge: true });
 }
 
-// ── DELETE DOSE ────────────────────────────────
-window.deleteDose = async (docId) => {
-  const item = histMap.get(docId);
-  if (!item) return;
-  const name = item.type === "ibu" ? "Ibuprofen" : "Paracetamol";
-  const timeStr = fmtHistDate(item.localTs);
-  if (!confirm(`Ștergi doza de ${name} din ${timeStr}?`)) return;
-
-  const type = item.type;
-  histMap.delete(docId); // remove from local map immediately
-  renderHistory();       // refresh list instantly
-
-  await deleteDoc(doc(db, "med_copil", "doze", "istoric", docId));
-  await recomputeLast(type);
-};
-
-// ── MARK DOSE (buton principal) ─────────────────
-window.markDose = async (type) => {
+// ── MARK + CONFIRM ───────────────────────────────
+window.markDose = async type => {
   const last = type === "ibu" ? lastIbu : lastPara;
   const rem  = last ? Math.max(0, INTERVAL_MS - (Date.now() - last)) : 0;
-
   if (rem > 0) {
     const name = type === "ibu" ? "Ibuprofen" : "Paracetamol";
-    const full = fmtCountdownFull(rem);
-    const at   = fmtHHMM(last + INTERVAL_MS);
     document.getElementById("cTitle").textContent = "Intervalul nu s-a împlinit";
     document.getElementById("cText").innerHTML =
-      `<b>${name}</b> poate fi dat din nou la ora <span class="time-highlight">${at}</span><br>
-       (mai sunt <b>${full}</b>).<br><br>
-       Ești sigur că vrei să marchezi acum?`;
+      `<b>${name}</b> poate fi dat din ora <span class="time-highlight">${fmtHHMM(last + INTERVAL_MS)}</span><br>
+       (mai sunt <b>${fmtCountdownFull(rem)}</b>).<br><br>Ești sigur că vrei să marchezi acum?`;
     document.getElementById("cOkBtn").className = `btn-ok c-${type}`;
     pendingType = type;
     document.getElementById("confirmModal").classList.remove("hidden");
@@ -644,75 +853,64 @@ window.markDose = async (type) => {
   }
   await saveDose(type);
 };
-
 window.doConfirm = async () => {
   if (!pendingType) return;
   document.getElementById("confirmModal").classList.add("hidden");
   await saveDose(pendingType);
   pendingType = null;
 };
-
 window.cancelConfirm = () => {
   document.getElementById("confirmModal").classList.add("hidden");
   pendingType = null;
 };
 
-// ── ADD MANUAL DOSE ────────────────────────────
+// ── DELETE ───────────────────────────────────────
+window.deleteDose = async docId => {
+  const item = histMap.get(docId);
+  if (!item) return;
+  const name = item.type === "ibu" ? "Ibuprofen" : "Paracetamol";
+  if (!confirm(`Ștergi doza de ${name} din ${fmtDayTime(item.localTs)}?`)) return;
+  const type = item.type;
+  histMap.delete(docId);
+  renderHistory();
+  if (activeTab === 'stat') renderStats();
+  await deleteDoc(doc(db, "med_copil", "doze", "istoric", docId));
+  await recomputeLast(type);
+};
+
+// ── ADD MANUAL ───────────────────────────────────
 window.openAdd = () => {
   addType = null;
   document.getElementById("addIbuBtn").className  = "who-btn";
   document.getElementById("addParaBtn").className = "who-btn";
-
-  // Default: today + current time
   const now = new Date();
-  const yy  = now.getFullYear();
-  const mm  = pad2(now.getMonth() + 1);
-  const dd  = pad2(now.getDate());
-  const hh  = pad2(now.getHours());
-  const min = pad2(now.getMinutes());
-  document.getElementById("addDate").value = `${yy}-${mm}-${dd}`;
-  document.getElementById("addTime").value = `${hh}:${min}`;
-
+  document.getElementById("addDate").value = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+  document.getElementById("addTime").value = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
   document.getElementById("addModal").classList.remove("hidden");
 };
-
 window.closeAdd = () => {
   document.getElementById("addModal").classList.add("hidden");
   addType = null;
 };
-
-window.selectAddMed = (type) => {
+window.selectAddMed = type => {
   addType = type;
   document.getElementById("addIbuBtn").className  = type === "ibu"  ? "who-btn sel-ibu"  : "who-btn";
   document.getElementById("addParaBtn").className = type === "para" ? "who-btn sel-para" : "who-btn";
 };
-
 window.saveManualDose = async () => {
   if (!addType) { alert("Selectează mai întâi medicamentul!"); return; }
   const dateVal = document.getElementById("addDate").value;
   const timeVal = document.getElementById("addTime").value;
   if (!dateVal || !timeVal) { alert("Completează data și ora!"); return; }
-
   const localTs = new Date(`${dateVal}T${timeVal}:00`).getTime();
   if (isNaN(localTs)) { alert("Data/ora invalidă!"); return; }
   if (localTs > Date.now() + 60_000) { alert("Nu poți adăuga doze din viitor!"); return; }
-
-  const typeToSave = addType; // salvăm înainte ca closeAdd() să reseteze addType
+  const typeToSave = addType;
   closeAdd();
   await saveDose(typeToSave, localTs);
 };
 
-// ── ONLINE / OFFLINE indicator ──────────────────
-function setSyncStatus(state, msg) {
-  document.getElementById("syncDot").className = "sync-dot" + (state === "ok" ? "" : state === "offline" ? " offline" : " err");
-  document.getElementById("syncLbl").textContent = msg;
-}
-
-window.addEventListener("online",  () => setSyncStatus("ok", "Sincronizat live"));
-window.addEventListener("offline", () => setSyncStatus("offline", "📴 Offline — dozele se salvează local și se sync când revine netul"));
-if (!navigator.onLine) setSyncStatus("offline", "📴 Offline — dozele se salvează local și se sync când revine netul");
-
-// ── TICK every second ──────────────────────────
+// ── TICK ─────────────────────────────────────────
 setInterval(refresh, 1000);
 </script>
 </body>
