@@ -259,6 +259,18 @@ body{
   </div>
 </div>
 
+<!-- ── DETAIL GAP MODAL ── -->
+<div class="overlay hidden" id="detailModal">
+  <div class="modal">
+    <div class="modal-icon" id="detailIcon">⏱</div>
+    <div class="modal-title" id="detailTitle"></div>
+    <div id="detailBody" style="margin:16px 0"></div>
+    <div class="confirm-btns">
+      <button class="btn-ok c-dark" style="flex:1" onclick="document.getElementById('detailModal').classList.add('hidden')">Închide</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── ADAUGĂ MANUAL ── -->
 <div class="overlay hidden" id="addModal">
   <div class="modal">
@@ -406,6 +418,7 @@ let pendingType = null;
 let addType   = null;
 let histMap   = new Map();
 let activeTab = 'doze';
+let gapDetails = { min: null, max: null }; // pentru modal detalii gap
 
 const app = initializeApp(cfg);
 const db  = initializeFirestore(app, {
@@ -743,14 +756,25 @@ function renderStats() {
     treatmentEventCount += sortedDoses.length;
     for (let i = 1; i < sortedDoses.length; i++) {
       const gap = sortedDoses[i].localTs - sortedDoses[i - 1].localTs;
-      if (gap >= MIN_GAP) treatmentGaps.push(gap);
+      if (gap >= MIN_GAP) treatmentGaps.push({
+        gap,
+        epStartTs: ep.startTs,
+        epEndTs:   ep.lastTs,
+        fromDose:  sortedDoses[i - 1],
+        toDose:    sortedDoses[i]
+      });
     }
   }
 
-  const avgDoseGap = treatmentGaps.length > 0 ? treatmentGaps.reduce((s, g) => s + g, 0) / treatmentGaps.length : null;
-  const minDoseGap = treatmentGaps.length > 0 ? Math.min(...treatmentGaps) : null;
-  const maxDoseGap = treatmentGaps.length > 0 ? Math.max(...treatmentGaps) : null;
+  const avgDoseGap = treatmentGaps.length > 0 ? treatmentGaps.reduce((s, t) => s + t.gap, 0) / treatmentGaps.length : null;
+  const minItem    = treatmentGaps.length > 0 ? treatmentGaps.reduce((a, b) => a.gap < b.gap ? a : b) : null;
+  const maxItem    = treatmentGaps.length > 0 ? treatmentGaps.reduce((a, b) => a.gap > b.gap ? a : b) : null;
+  const minDoseGap = minItem?.gap ?? null;
+  const maxDoseGap = maxItem?.gap ?? null;
   const doseGapsTotal = treatmentGaps.length;
+
+  // Salvăm pentru modal onclick
+  gapDetails = { min: minItem, max: maxItem };
 
   // Total doze
   const totalDoses = [...histMap.values()].length;
@@ -811,13 +835,13 @@ function renderStats() {
           </div>
         </div>
         <div style="display:flex;gap:8px">
-          <div style="flex:1;padding:10px 12px;background:#fef2f2;border-radius:12px;text-align:center">
-            <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai scurt</div>
+          <div onclick="showGapDetail('min')" style="flex:1;padding:10px 12px;background:#fef2f2;border-radius:12px;text-align:center;cursor:pointer;active:opacity:.8">
+            <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai scurt 🔍</div>
             <div style="font-size:1.15rem;font-weight:900;color:#dc2626">${fmtHours(minDoseGap)}</div>
             <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">febra a revenit repede</div>
           </div>
-          <div style="flex:1;padding:10px 12px;background:#f0fdf4;border-radius:12px;text-align:center">
-            <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai lung</div>
+          <div onclick="showGapDetail('max')" style="flex:1;padding:10px 12px;background:#f0fdf4;border-radius:12px;text-align:center;cursor:pointer">
+            <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai lung 🔍</div>
             <div style="font-size:1.15rem;font-weight:900;color:#16a34a">${fmtHours(maxDoseGap)}</div>
             <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">doza a ținut mai mult</div>
           </div>
@@ -932,7 +956,58 @@ window.cancelConfirm = () => {
   pendingType = null;
 };
 
-// ── DELETE ───────────────────────────────────────
+// ── GAP DETAIL MODAL ─────────────────────────────
+window.showGapDetail = (type) => {
+  const item = gapDetails[type];
+  if (!item) return;
+
+  const isMin   = type === 'min';
+  const fromName = item.fromDose.type === 'ibu' ? '💙 Ibuprofen' : '🟡 Paracetamol';
+  const toName   = item.toDose.type   === 'ibu' ? '💙 Ibuprofen' : '🟡 Paracetamol';
+
+  const epStart = fmtEpisodeDate(item.epStartTs);
+  const epEnd   = fmtEpisodeDate(item.epEndTs);
+  const epStr   = epStart === epEnd ? epStart : `${epStart} → ${epEnd}`;
+
+  const fromTime = `${fmtEpisodeDate(item.fromDose.localTs)}, ora ${fmtHHMM(item.fromDose.localTs)}`;
+  const toTime   = `${fmtEpisodeDate(item.toDose.localTs)}, ora ${fmtHHMM(item.toDose.localTs)}`;
+
+  document.getElementById('detailIcon').textContent = isMin ? '🔴' : '🟢';
+  document.getElementById('detailTitle').textContent =
+    isMin ? 'Cel mai scurt interval' : 'Cel mai lung interval';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div style="background:#f8fafc;border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:.82rem;color:#64748b">
+      <span style="font-weight:700;color:#334155">Episod:</span> ${epStr}
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:0">
+      <!-- Doza de la -->
+      <div style="background:#f8fafc;border-radius:14px 14px 0 0;padding:14px;border-bottom:2px dashed #e2e8f0">
+        <div style="font-size:.68rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">De la</div>
+        <div style="font-size:1rem;font-weight:800;color:#0f172a">${fromName}</div>
+        <div style="font-size:.8rem;color:#64748b;margin-top:2px">${fromTime}</div>
+      </div>
+
+      <!-- Gap vizual -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-left:2px solid #e2e8f0;border-right:2px solid #e2e8f0">
+        <div style="font-size:1.3rem">⏱</div>
+        <div>
+          <div style="font-size:1.3rem;font-weight:900;color:${isMin ? '#dc2626' : '#16a34a'}">${fmtHours(item.gap)}</div>
+          <div style="font-size:.72rem;color:#94a3b8">${isMin ? 'febra a revenit repede' : 'doza a ținut mai mult'}</div>
+        </div>
+      </div>
+
+      <!-- Doza la -->
+      <div style="background:#f8fafc;border-radius:0 0 14px 14px;padding:14px;border-top:2px dashed #e2e8f0">
+        <div style="font-size:.68rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">La</div>
+        <div style="font-size:1rem;font-weight:800;color:#0f172a">${toName}</div>
+        <div style="font-size:.8rem;color:#64748b;margin-top:2px">${toTime}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('detailModal').classList.remove('hidden');
+};
 window.deleteDose = async docId => {
   const item = histMap.get(docId);
   if (!item) return;
