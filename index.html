@@ -111,6 +111,7 @@ body{
 .badge{padding:5px 12px;border-radius:22px;font-size:.74rem;font-weight:800;white-space:nowrap;display:inline-block}
 .b-ok{background:#dcfce7;color:#166534}
 .b-wait{background:#fee2e2;color:#991b1b}
+.b-urgenta{background:#fef3c7;color:#92400e}
 .b-none{background:#f1f5f9;color:#94a3b8}
 .b-ok.pulse{animation:pg 2s infinite}
 @keyframes pg{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.3)}50%{box-shadow:0 0 0 5px rgba(34,197,94,0)}}
@@ -129,6 +130,7 @@ body{
   font-variant-numeric:tabular-nums;
 }
 .tn-ok{background:#f0fdf4;color:#15803d}
+.tn-urgenta{background:#fefce8;color:#a16207}
 .tn-wait{background:#fff7ed;color:#c2410c}
 .tn-none{background:#f8fafc;color:#94a3b8}
 
@@ -298,15 +300,6 @@ body{
 
 <div class="wrap">
 
-  <!-- INTERVAL MODE -->
-  <div class="mode-card">
-    <div class="mode-label">Mod interval doze</div>
-    <div class="mode-btns">
-      <button class="mode-btn" id="btnNormal" onclick="setIntervalMode('normal')">🕐 Normal — 8 ore</button>
-      <button class="mode-btn" id="btnUrgenta" onclick="setIntervalMode('urgenta')">⚡ Urgență — 6 ore</button>
-    </div>
-  </div>
-
   <!-- IBUPROFEN CARD -->
   <div class="card c-ibu">
     <div class="card-head">
@@ -403,11 +396,9 @@ const cfg = {
 };
 // ════════════════════════════════════════════
 
-const INTERVAL_NORMAL  = 8 * 3_600_000;  // 8 ore
-const INTERVAL_URGENTA = 6 * 3_600_000;  // 6 ore
-const EPISODE_GAP      = 48 * 3_600_000; // 48h = episod nou de febră
-
-let INTERVAL_MS = INTERVAL_NORMAL;
+const INTERVAL_HARD = 6 * 3_600_000;  // 6h — minim absolut (urgență)
+const INTERVAL_SOFT = 8 * 3_600_000;  // 8h — interval normal recomandat
+const EPISODE_GAP   = 48 * 3_600_000;
 
 let lastIbu   = null;
 let lastPara  = null;
@@ -441,22 +432,6 @@ window.setUser = name => {
   document.getElementById("whoModal").classList.add("hidden");
 };
 window.changeUser = () => document.getElementById("whoModal").classList.remove("hidden");
-
-// ── INTERVAL MODE ────────────────────────────────
-let intervalMode = localStorage.getItem('medcopil_interval') || 'normal';
-function applyIntervalMode(mode) {
-  intervalMode = mode;
-  INTERVAL_MS  = mode === 'urgenta' ? INTERVAL_URGENTA : INTERVAL_NORMAL;
-  localStorage.setItem('medcopil_interval', mode);
-  const label = mode === 'urgenta' ? '6 ore' : '8 ore';
-  document.getElementById('btnNormal').className   = 'mode-btn' + (mode === 'normal'   ? ' sel-normal'  : '');
-  document.getElementById('btnUrgenta').className  = 'mode-btn' + (mode === 'urgenta'  ? ' sel-urgenta' : '');
-  document.getElementById('ibuRule').textContent   = `Interval: ${label}`;
-  document.getElementById('paraRule').textContent  = `Interval: ${label}`;
-  refresh();
-}
-window.setIntervalMode = mode => applyIntervalMode(mode);
-applyIntervalMode(intervalMode);
 
 // ── TABS ────────────────────────────────────────
 window.switchTab = tab => {
@@ -557,6 +532,16 @@ function fmtDays(ms) {
   return y === 1 ? '~1 an' : `~${y} ani`;
 }
 
+function fmtHours(ms) {
+  // Format ore+minute pentru intervale scurte (între doze)
+  const totalMin = Math.floor(ms / 60_000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h === 0) return `${m}min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}min`;
+}
+
 function fmtEpisodeDate(ts) {
   const d = new Date(ts);
   const now = new Date();
@@ -568,10 +553,15 @@ function fmtEpisodeDate(ts) {
 
 // ── CARD UPDATE ──────────────────────────────────
 function updateCard(type, lastTs) {
-  const now  = Date.now();
-  const diff = lastTs ? now - lastTs : null;
-  const rem  = lastTs ? Math.max(0, INTERVAL_MS - (now - lastTs)) : 0;
-  const ok   = !lastTs || rem === 0;
+  const now     = Date.now();
+  const diff    = lastTs ? now - lastTs : null;
+  const remHard = lastTs ? Math.max(0, INTERVAL_HARD - (now - lastTs)) : 0;
+  const remSoft = lastTs ? Math.max(0, INTERVAL_SOFT - (now - lastTs)) : 0;
+
+  // Stări: waiting(<6h) / urgenta(6-8h) / normal(8h+)
+  const canGive   = !lastTs || remHard === 0;
+  const isUrgenta = canGive && lastTs && remSoft > 0;
+  const isNormal  = canGive && lastTs && remSoft === 0;
 
   const bigEl      = document.getElementById(`${type}Big`);
   const preEl      = document.getElementById(`${type}Pre`);
@@ -580,35 +570,56 @@ function updateCard(type, lastTs) {
   const badgeEl    = document.getElementById(`${type}Badge`);
   const badgePreEl = document.getElementById(`${type}BadgePre`);
   const btnEl      = document.getElementById(`${type}Btn`);
+  const ruleEl     = document.getElementById(`${type}Rule`);
 
   bigEl.textContent = diff != null ? fmtElapsed(diff) : "—";
   preEl.textContent = lastTs ? "de la ultima doză" : "";
   subEl.textContent = lastTs ? `ultima doză ${fmtLastDoseLabel(lastTs)}` : "Nicio doză înregistrată";
 
   if (!lastTs) {
+    // Nicio doză
+    ruleEl.textContent     = "Urgență ≥ 6h · Normal ≥ 8h";
     badgePreEl.textContent = "";
-    badgeEl.className   = "badge b-none";
-    badgeEl.textContent = "—";
-    nextEl.className    = "time-next tn-none";
-    nextEl.innerHTML    = "<span>Apasă butonul când dai prima doză</span>";
-  } else if (ok) {
-    badgePreEl.textContent = "";
-    badgeEl.className   = "badge b-ok pulse";
-    badgeEl.textContent = "✓ Poți da";
-    nextEl.className    = "time-next tn-ok";
-    nextEl.innerHTML    = "<span>✅ Intervalul s-a împlinit — poți da acum</span>";
-  } else {
-    const short = fmtCountdownShort(rem);
-    const full  = fmtCountdownFull(rem);
-    const at    = fmtHHMM(lastTs + INTERVAL_MS);
+    badgeEl.className      = "badge b-none";
+    badgeEl.textContent    = "—";
+    nextEl.className       = "time-next tn-none";
+    nextEl.innerHTML       = "<span>Apasă butonul când dai prima doză</span>";
+
+  } else if (!canGive) {
+    // Sub 6h — nu se poate da
+    const fullH = fmtCountdownFull(remHard);
+    const atH   = fmtHHMM(lastTs + INTERVAL_HARD);
+    const atS   = fmtHHMM(lastTs + INTERVAL_SOFT);
+    ruleEl.textContent     = "Urgență ≥ 6h · Normal ≥ 8h";
     badgePreEl.textContent = "timp rămas";
-    badgeEl.className   = "badge b-wait";
-    badgeEl.textContent = `⏳ ${short}`;
-    nextEl.className    = "time-next tn-wait";
-    nextEl.innerHTML    = `<span>⛔ Mai poți da peste <b>${full}</b>&nbsp;(ora ${at})</span>`;
+    badgeEl.className      = "badge b-wait";
+    badgeEl.textContent    = `⏳ ${fmtCountdownShort(remHard)}`;
+    nextEl.className       = "time-next tn-wait";
+    nextEl.innerHTML       = `<span>⛔ Urgență posibilă de la ora <b>${atH}</b> (mai ${fullH}) · Normal de la <b>${atS}</b></span>`;
+
+  } else if (isUrgenta) {
+    // 6–8h — urgență posibilă
+    const fullS = fmtCountdownFull(remSoft);
+    const atS   = fmtHHMM(lastTs + INTERVAL_SOFT);
+    ruleEl.textContent     = "⚡ Interval urgență împlinit";
+    badgePreEl.textContent = "";
+    badgeEl.className      = "badge b-urgenta";
+    badgeEl.textContent    = "⚡ Urgență";
+    nextEl.className       = "time-next tn-urgenta";
+    nextEl.innerHTML       = `<span>⚡ Poți da în regim de urgență — interval normal (8h) de la ora <b>${atS}</b> (mai ${fullS})</span>`;
+
+  } else {
+    // 8h+ — normal
+    ruleEl.textContent     = "✓ Interval normal împlinit";
+    badgePreEl.textContent = "";
+    badgeEl.className      = "badge b-ok pulse";
+    badgeEl.textContent    = "✓ Normal";
+    nextEl.className       = "time-next tn-ok";
+    nextEl.innerHTML       = "<span>✅ Intervalul normal (8h) s-a împlinit</span>";
   }
 
-  btnEl.classList.toggle("early", !ok);
+  // Butonul e dashed doar sub 6h
+  btnEl.classList.toggle("early", !canGive);
 }
 
 function refresh() {
@@ -720,6 +731,18 @@ function renderStats() {
   const minGap = gaps.length > 0 ? Math.min(...gaps) : null;
   const maxGap = gaps.length > 0 ? Math.max(...gaps) : null;
 
+  // Gaps ÎNTRE DOZE în același episod (cât de des au dat în febră)
+  const doseGaps = [];
+  for (const ep of eps) {
+    const sortedDoses = [...ep.doses].sort((a, b) => a.localTs - b.localTs);
+    for (let i = 1; i < sortedDoses.length; i++) {
+      doseGaps.push(sortedDoses[i].localTs - sortedDoses[i - 1].localTs);
+    }
+  }
+  const avgDoseGap = doseGaps.length > 0 ? doseGaps.reduce((s, g) => s + g, 0) / doseGaps.length : null;
+  const minDoseGap = doseGaps.length > 0 ? Math.min(...doseGaps) : null;
+  const maxDoseGap = doseGaps.length > 0 ? Math.max(...doseGaps) : null;
+
   // Total doze
   const totalDoses = [...histMap.values()].length;
 
@@ -763,6 +786,40 @@ function renderStats() {
       <span style="font-size:.75rem;color:#64748b;font-weight:700">Cel mai lung interval fără febră</span>
       <span style="font-size:1.1rem;font-weight:900;color:#0f172a">${fmtDays(maxGap)}</span>
     </div>` : ''}
+
+    <!-- Interval între doze în febră -->
+    ${avgDoseGap ? `
+    <div class="stat-card">
+      <div class="stat-card-title">⏱ Interval între doze în timpul febrei</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f8fafc;border-radius:12px">
+          <div>
+            <div style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Interval mediu între doze</div>
+            <div style="font-size:.8rem;color:#64748b;margin-top:2px">cât durează efectul unui medicament</div>
+          </div>
+          <div style="font-size:1.4rem;font-weight:900;color:#0f172a">${fmtHours(avgDoseGap)}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;padding:10px 12px;background:#fef2f2;border-radius:12px;text-align:center">
+            <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai scurt</div>
+            <div style="font-size:1.1rem;font-weight:900;color:#dc2626">${fmtHours(minDoseGap)}</div>
+            <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">febră intensă</div>
+          </div>
+          <div style="flex:1;padding:10px 12px;background:#f0fdf4;border-radius:12px;text-align:center">
+            <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai lung</div>
+            <div style="font-size:1.1rem;font-weight:900;color:#16a34a">${fmtHours(maxDoseGap)}</div>
+            <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">febră ușoară</div>
+          </div>
+        </div>
+        <div style="font-size:.72rem;color:#94a3b8;text-align:center">
+          calculat din ${doseGaps.length} intervale pe ${eps.length} episoade
+        </div>
+      </div>
+    </div>` : `
+    <div class="stat-card">
+      <div class="stat-card-title">⏱ Interval între doze în timpul febrei</div>
+      <div class="empty-h" style="padding:16px 0">Necesită minim 2 doze în același episod</div>
+    </div>`}
 
     <!-- Chart pe luni -->
     ${monthKeys.length > 0 ? `
@@ -838,14 +895,14 @@ async function recomputeLast(type) {
 
 // ── MARK + CONFIRM ───────────────────────────────
 window.markDose = async type => {
-  const last = type === "ibu" ? lastIbu : lastPara;
-  const rem  = last ? Math.max(0, INTERVAL_MS - (Date.now() - last)) : 0;
-  if (rem > 0) {
+  const last    = type === "ibu" ? lastIbu : lastPara;
+  const remHard = last ? Math.max(0, INTERVAL_HARD - (Date.now() - last)) : 0;
+  if (remHard > 0) {
     const name = type === "ibu" ? "Ibuprofen" : "Paracetamol";
-    document.getElementById("cTitle").textContent = "Intervalul nu s-a împlinit";
+    document.getElementById("cTitle").textContent = "Interval minim neîmplinit";
     document.getElementById("cText").innerHTML =
-      `<b>${name}</b> poate fi dat din ora <span class="time-highlight">${fmtHHMM(last + INTERVAL_MS)}</span><br>
-       (mai sunt <b>${fmtCountdownFull(rem)}</b>).<br><br>Ești sigur că vrei să marchezi acum?`;
+      `<b>${name}</b> poate fi dat în regim de urgență de la ora <span class="time-highlight">${fmtHHMM(last + INTERVAL_HARD)}</span><br>
+       (mai sunt <b>${fmtCountdownFull(remHard)}</b>).<br><br>Ești sigur că vrei să marchezi acum?`;
     document.getElementById("cOkBtn").className = `btn-ok c-${type}`;
     pendingType = type;
     document.getElementById("confirmModal").classList.remove("hidden");
