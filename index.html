@@ -731,17 +731,26 @@ function renderStats() {
   const minGap = gaps.length > 0 ? Math.min(...gaps) : null;
   const maxGap = gaps.length > 0 ? Math.max(...gaps) : null;
 
-  // Gaps ÎNTRE DOZE în același episod (cât de des au dat în febră)
-  const doseGaps = [];
+  // Gap între doze consecutive în același episod
+  // Protocol Paul: ibu → 3h → para → 3h → ibu (alternare la ~3h)
+  // Filtram doar sub 1h = erori de introducere manuală
+  const MIN_GAP = 1 * 3_600_000;
+  const treatmentGaps = [];
+  let treatmentEventCount = 0;
+
   for (const ep of eps) {
     const sortedDoses = [...ep.doses].sort((a, b) => a.localTs - b.localTs);
+    treatmentEventCount += sortedDoses.length;
     for (let i = 1; i < sortedDoses.length; i++) {
-      doseGaps.push(sortedDoses[i].localTs - sortedDoses[i - 1].localTs);
+      const gap = sortedDoses[i].localTs - sortedDoses[i - 1].localTs;
+      if (gap >= MIN_GAP) treatmentGaps.push(gap);
     }
   }
-  const avgDoseGap = doseGaps.length > 0 ? doseGaps.reduce((s, g) => s + g, 0) / doseGaps.length : null;
-  const minDoseGap = doseGaps.length > 0 ? Math.min(...doseGaps) : null;
-  const maxDoseGap = doseGaps.length > 0 ? Math.max(...doseGaps) : null;
+
+  const avgDoseGap = treatmentGaps.length > 0 ? treatmentGaps.reduce((s, g) => s + g, 0) / treatmentGaps.length : null;
+  const minDoseGap = treatmentGaps.length > 0 ? Math.min(...treatmentGaps) : null;
+  const maxDoseGap = treatmentGaps.length > 0 ? Math.max(...treatmentGaps) : null;
+  const doseGapsTotal = treatmentGaps.length;
 
   // Total doze
   const totalDoses = [...histMap.values()].length;
@@ -787,38 +796,40 @@ function renderStats() {
       <span style="font-size:1.1rem;font-weight:900;color:#0f172a">${fmtDays(maxGap)}</span>
     </div>` : ''}
 
-    <!-- Interval între doze în febră -->
+    <!-- Cât a ținut efectul tratamentului -->
     ${avgDoseGap ? `
     <div class="stat-card">
-      <div class="stat-card-title">⏱ Interval între doze în timpul febrei</div>
+      <div class="stat-card-title">⏱ Cât a ținut efectul fiecărei doze</div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f8fafc;border-radius:12px">
-          <div>
-            <div style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Interval mediu între doze</div>
-            <div style="font-size:.8rem;color:#64748b;margin-top:2px">cât durează efectul unui medicament</div>
+        <div style="padding:10px 12px;background:#f8fafc;border-radius:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Interval mediu între doze</div>
+              <div style="font-size:.78rem;color:#64748b;margin-top:2px">ibu → para → ibu (alternare)</div>
+            </div>
+            <div style="font-size:1.5rem;font-weight:900;color:#0f172a">${fmtHours(avgDoseGap)}</div>
           </div>
-          <div style="font-size:1.4rem;font-weight:900;color:#0f172a">${fmtHours(avgDoseGap)}</div>
         </div>
         <div style="display:flex;gap:8px">
           <div style="flex:1;padding:10px 12px;background:#fef2f2;border-radius:12px;text-align:center">
             <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai scurt</div>
-            <div style="font-size:1.1rem;font-weight:900;color:#dc2626">${fmtHours(minDoseGap)}</div>
-            <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">febră intensă</div>
+            <div style="font-size:1.15rem;font-weight:900;color:#dc2626">${fmtHours(minDoseGap)}</div>
+            <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">febra a revenit repede</div>
           </div>
           <div style="flex:1;padding:10px 12px;background:#f0fdf4;border-radius:12px;text-align:center">
             <div style="font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">Cel mai lung</div>
-            <div style="font-size:1.1rem;font-weight:900;color:#16a34a">${fmtHours(maxDoseGap)}</div>
-            <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">febră ușoară</div>
+            <div style="font-size:1.15rem;font-weight:900;color:#16a34a">${fmtHours(maxDoseGap)}</div>
+            <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">doza a ținut mai mult</div>
           </div>
         </div>
-        <div style="font-size:.72rem;color:#94a3b8;text-align:center">
-          calculat din ${doseGaps.length} intervale pe ${eps.length} episoade
+        <div style="font-size:.7rem;color:#94a3b8;text-align:center;line-height:1.5">
+          ${doseGapsTotal} intervale din ${treatmentEventCount} doze pe ${eps.length} episoade
         </div>
       </div>
     </div>` : `
     <div class="stat-card">
-      <div class="stat-card-title">⏱ Interval între doze în timpul febrei</div>
-      <div class="empty-h" style="padding:16px 0">Necesită minim 2 doze în același episod</div>
+      <div class="stat-card-title">⏱ Cât a ținut efectul medicamentului</div>
+      <div class="empty-h" style="padding:16px 0;font-size:.82rem">Necesită minim 2 tratamente în același episod</div>
     </div>`}
 
     <!-- Chart pe luni -->
