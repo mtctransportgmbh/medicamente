@@ -165,6 +165,49 @@
     font-size:11px; color:var(--basil); border:1px solid rgba(122,154,74,0.4);
     padding:4px 9px; border-radius:20px;
   }
+
+  /* Save + saved recipes */
+  .name-input{
+    width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--line);
+    background:var(--char3); color:var(--flour); font-family:'Work Sans',sans-serif;
+    font-size:14px; margin-bottom:12px;
+  }
+  .name-input::placeholder{color:var(--flour-dim);}
+  .save-btn{
+    width:100%; padding:13px; border-radius:9px; border:none; background:var(--tomato);
+    color:var(--flour); font-family:'Work Sans',sans-serif; font-weight:600; font-size:14.5px;
+    cursor:pointer;
+  }
+  .save-btn:active{background:var(--tomato-dim);}
+  .save-status{min-height:16px; margin:10px 0 0;}
+
+  .recipe-item{padding:14px 0; border-bottom:1px dashed var(--line);}
+  .recipe-item:first-child{padding-top:2px;}
+  .recipe-item:last-child{border-bottom:none;}
+  .recipe-top{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .recipe-name{font-weight:600; font-size:14px; color:var(--flour); flex:1;}
+  .recipe-date{font-family:'Space Mono',monospace; font-size:10.5px; color:var(--flour-dim); display:block; margin-top:2px;}
+  .fav-btn{
+    background:none; border:none; color:var(--flour-dim); font-size:19px; cursor:pointer;
+    padding:0 2px; line-height:1; flex-shrink:0;
+  }
+  .fav-btn.active{color:var(--tomato);}
+  .recipe-meta{font-size:12px; color:var(--flour-dim); margin:8px 0 2px;}
+  .recipe-meta2{font-family:'Space Mono',monospace; font-size:11.5px; color:var(--basil); margin:0 0 10px;}
+  .recipe-actions{display:flex; gap:8px;}
+  .recipe-actions button{
+    flex:1; padding:9px 8px; border-radius:8px; border:1px solid var(--line);
+    background:var(--char3); color:var(--flour); font-size:12.5px; cursor:pointer;
+    font-family:'Work Sans',sans-serif;
+  }
+  .recipe-actions button.danger{color:#e5836b; border-color:rgba(229,131,107,0.35);}
+  .empty-state{font-size:13px; color:var(--flour-dim); text-align:center; padding:10px 0;}
+  .clear-link{
+    background:none; border:none; color:var(--flour-dim); font-size:12px;
+    text-decoration:underline; cursor:pointer; font-family:'Work Sans',sans-serif;
+    display:block; margin:16px auto 0; text-align:center; width:100%;
+  }
+  .clear-link.confirming{color:var(--tomato);}
 </style>
 </head>
 <body>
@@ -293,6 +336,19 @@
     <p class="ticket-foot" id="outFermSummary">24h @ 4°C</p>
   </div>
 
+  <section class="card">
+    <p class="section-title">Salvează rețeta curentă</p>
+    <input type="text" id="recipeName" class="name-input" placeholder="ex: tura 3 — frigider 48h">
+    <button class="save-btn" onclick="saveRecipe()">Salvează rețeta</button>
+    <p class="hint save-status" id="saveStatus"></p>
+  </section>
+
+  <section class="card">
+    <p class="section-title">Rețetele tale</p>
+    <div id="recipeList"><p class="empty-state">Se încarcă…</p></div>
+    <button class="clear-link" id="clearAllBtn" onclick="clearAllRecipes()">Șterge toate rețetele</button>
+  </section>
+
   <p class="tips">
     <b>Notă:</b> procentul de drojdie e o estimare pornind de la durată și temperatură — Nuvola Super e o făină puternică și tolerează fermentări lungi. Dacă aluatul tău crește vizibil mai repede sau mai încet decât te aștepți, folosește ajustarea manuală data viitoare și ține minte ce procent a funcționat. Sarea se adaugă de obicei spre finalul frământării, nu direct peste drojdie.
   </p>
@@ -408,9 +464,187 @@ function update(){
   let fermTxt = h1 + 'h @ ' + t1 + '°C';
   if (stage2on) fermTxt += '  +  ' + h2 + 'h @ ' + t2 + '°C';
   document.getElementById('outFermSummary').textContent = fermTxt;
+
+  lastComputed = {
+    balls, weight, hydration: hyd, salt: saltPct, oil: oilPct,
+    h1, t1, stage2on,
+    h2: stage2on ? h2 : null, t2: stage2on ? t2 : null,
+    yeastType, manualOn,
+    manualPct: manualOn ? parseFloat(document.getElementById('manualPct').value) : null,
+    usedPct, fermTxt,
+    flour: Math.round(flour), water: Math.round(water),
+    saltG: Math.round(salt * 10) / 10, oilG: Math.round(oil * 10) / 10,
+    yeastG: Math.round(yeastG * 100) / 100,
+    totalDough: Math.round(totalDough)
+  };
+}
+
+let lastComputed = null;
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function saveRecipe(){
+  const statusEl = document.getElementById('saveStatus');
+  const nameInput = document.getElementById('recipeName');
+  const name = nameInput.value.trim() || (lastComputed.balls + '×' + lastComputed.weight + 'g · ' + lastComputed.fermTxt);
+  const id = 'r' + Date.now();
+  const recipe = Object.assign({ id, name, savedAt: new Date().toISOString(), favorite: false }, lastComputed);
+
+  statusEl.textContent = 'Se salvează…';
+  try{
+    const result = await window.storage.set('recipe:' + id, JSON.stringify(recipe), false);
+    if (!result) throw new Error('no result');
+    nameInput.value = '';
+    statusEl.textContent = 'Salvat ✓';
+    await loadRecipeList();
+    setTimeout(()=>{ if (statusEl.textContent === 'Salvat ✓') statusEl.textContent = ''; }, 2500);
+  } catch(e){
+    console.error('Save error:', e);
+    statusEl.textContent = 'Nu am putut salva — încearcă din nou.';
+  }
+}
+
+async function loadRecipeList(){
+  const container = document.getElementById('recipeList');
+  try{
+    const listResult = await window.storage.list('recipe:', false);
+    const keys = (listResult && listResult.keys) ? listResult.keys : [];
+
+    if (keys.length === 0){
+      container.innerHTML = '<p class="empty-state">Nicio rețetă salvată încă. Salvează una mai sus după ce reglezi parametrii.</p>';
+      document.getElementById('clearAllBtn').style.display = 'none';
+      return;
+    }
+
+    const recipes = [];
+    for (const k of keys){
+      try{
+        const r = await window.storage.get(k, false);
+        if (r && r.value) recipes.push(JSON.parse(r.value));
+      } catch(e){ /* skip unreadable entry */ }
+    }
+
+    recipes.sort((a,b) => {
+      if (a.favorite !== b.favorite) return b.favorite - a.favorite;
+      return new Date(b.savedAt) - new Date(a.savedAt);
+    });
+
+    renderRecipeList(recipes);
+    document.getElementById('clearAllBtn').style.display = recipes.length ? 'block' : 'none';
+  } catch(e){
+    console.error('List error:', e);
+    container.innerHTML = '<p class="empty-state">Nu am putut încărca rețetele salvate.</p>';
+  }
+}
+
+function renderRecipeList(recipes){
+  const container = document.getElementById('recipeList');
+  if (!recipes.length){
+    container.innerHTML = '<p class="empty-state">Nicio rețetă salvată încă.</p>';
+    return;
+  }
+  container.innerHTML = recipes.map(r => {
+    const date = new Date(r.savedAt).toLocaleDateString('ro-RO', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+    const yeastLbl = r.yeastType === 'proaspata' ? 'proasp.' : 'usc.';
+    return '<div class="recipe-item">'
+      + '<div class="recipe-top">'
+        + '<span class="recipe-name">' + escapeHtml(r.name) + '<span class="recipe-date">' + date + '</span></span>'
+        + '<button class="fav-btn ' + (r.favorite ? 'active' : '') + '" onclick="toggleFavorite(\'' + r.id + '\')" title="Favorită">' + (r.favorite ? '★' : '☆') + '</button>'
+      + '</div>'
+      + '<p class="recipe-meta">' + r.balls + ' paline · ' + r.hydration + '% hidr · ' + r.salt.toFixed(1) + '% sare · ' + r.fermTxt + '</p>'
+      + '<p class="recipe-meta2">' + r.flour + 'g făină · ' + r.water + 'g apă · ' + r.yeastG + 'g drojdie ' + yeastLbl + '</p>'
+      + '<div class="recipe-actions">'
+        + '<button onclick="loadRecipe(\'' + r.id + '\')">Încarcă în calculator</button>'
+        + '<button class="danger" onclick="deleteRecipe(\'' + r.id + '\')">Șterge</button>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+async function loadRecipe(id){
+  try{
+    const r = await window.storage.get('recipe:' + id, false);
+    if (!r) return;
+    const rec = JSON.parse(r.value);
+
+    document.getElementById('ballsNum').textContent = rec.balls;
+    document.getElementById('weight').value = rec.weight;
+    document.getElementById('hydration').value = rec.hydration;
+    document.getElementById('salt').value = rec.salt;
+    document.getElementById('oil').value = rec.oil;
+    document.getElementById('h1').value = rec.h1;
+    document.getElementById('t1').value = rec.t1;
+    document.getElementById('stage2on').checked = !!rec.stage2on;
+    if (rec.stage2on){
+      document.getElementById('h2').value = rec.h2;
+      document.getElementById('t2').value = rec.t2;
+    }
+    document.getElementById('manualOn').checked = !!rec.manualOn;
+    if (rec.manualOn && rec.manualPct != null){
+      document.getElementById('manualPct').value = rec.manualPct;
+    }
+    setYeastType(rec.yeastType);
+    update();
+    document.querySelector('.hero').scrollIntoView({behavior:'smooth'});
+  } catch(e){
+    console.error('Load error:', e);
+  }
+}
+
+async function toggleFavorite(id){
+  try{
+    const r = await window.storage.get('recipe:' + id, false);
+    if (!r) return;
+    const rec = JSON.parse(r.value);
+    rec.favorite = !rec.favorite;
+    await window.storage.set('recipe:' + id, JSON.stringify(rec), false);
+    await loadRecipeList();
+  } catch(e){ console.error('Favorite error:', e); }
+}
+
+async function deleteRecipe(id){
+  try{
+    await window.storage.delete('recipe:' + id, false);
+    await loadRecipeList();
+  } catch(e){ console.error('Delete error:', e); }
+}
+
+let clearConfirming = false;
+async function clearAllRecipes(){
+  const btn = document.getElementById('clearAllBtn');
+  if (!clearConfirming){
+    clearConfirming = true;
+    btn.textContent = 'Sigur? Apasă din nou ca să ștergi tot';
+    btn.classList.add('confirming');
+    setTimeout(()=>{
+      clearConfirming = false;
+      btn.textContent = 'Șterge toate rețetele';
+      btn.classList.remove('confirming');
+    }, 4000);
+    return;
+  }
+  clearConfirming = false;
+  btn.textContent = 'Se șterge…';
+  try{
+    const listResult = await window.storage.list('recipe:', false);
+    const keys = (listResult && listResult.keys) ? listResult.keys : [];
+    for (const k of keys){
+      try{ await window.storage.delete(k, false); } catch(e){ /* continue */ }
+    }
+    btn.classList.remove('confirming');
+    await loadRecipeList();
+  } catch(e){
+    console.error('Clear all error:', e);
+    btn.textContent = 'Șterge toate rețetele';
+  }
 }
 
 update();
+loadRecipeList();
 </script>
 </body>
 </html>
