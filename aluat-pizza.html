@@ -141,6 +141,12 @@
     font-size:19px; margin:2px 0 16px; color:var(--char);
   }
   .tear{border-top:1.5px dashed #b9ae98; margin:14px 0;}
+  .ticket-ready{
+    text-align:center; font-family:'Space Mono',monospace; font-size:12.5px; font-weight:600;
+    color:#7a2a13; background:rgba(212,73,31,0.10); border:1px solid rgba(212,73,31,0.25);
+    border-radius:8px; padding:9px 10px; margin:0 0 16px; line-height:1.5;
+  }
+  .ticket-ready b{font-size:14.5px;}
   .ing-row{
     display:flex; justify-content:space-between; align-items:baseline;
     padding:9px 0; border-bottom:1px dashed #d9d0bd;
@@ -262,6 +268,16 @@
   <section class="card">
     <p class="section-title">Fermentare</p>
     <div class="field">
+      <div class="field-label">Ora de start <span class="field-value" id="startTimeVal">→ gata —</span></div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="time" id="startTime" oninput="update()"
+          style="flex:1; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--char3); color:var(--flour); font-family:'Space Mono',monospace; font-size:15px;">
+        <button type="button" onclick="setStartNow()"
+          style="padding:10px 14px; border-radius:9px; border:1px solid var(--line); background:var(--char3); color:var(--flour-dim); font-size:12.5px; font-family:'Work Sans',sans-serif; cursor:pointer; white-space:nowrap;">Acum</button>
+      </div>
+      <p class="hint">Ora la care pui aluatul la frământat / fermentat — restul se calculează automat de acolo.</p>
+    </div>
+    <div class="field">
       <div class="field-label">Faza 1 — durată <span class="field-value" id="h1Val">24 h</span></div>
       <input type="range" id="h1" min="1" max="96" step="1" value="24" oninput="update()">
     </div>
@@ -308,6 +324,7 @@
   <div class="ticket">
     <p class="ticket-head">Buon appetito</p>
     <p class="ticket-title">Rețeta ta de aluat</p>
+    <p class="ticket-ready" id="outReadyLine">Start —:— → gata de copt —:—</p>
 
     <div class="ing-row">
       <div class="ing-name">Făină<span class="ing-sub">Caputo Nuvola Super</span></div>
@@ -380,6 +397,27 @@ function changeBalls(delta){
   v = Math.max(1, Math.min(40, v));
   el.textContent = v;
   update();
+}
+
+function setStartNow(){
+  const now = new Date();
+  document.getElementById('startTime').value =
+    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  update();
+}
+
+function formatTime(date){
+  return String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
+}
+
+function formatWithDay(date, refDate){
+  const d1 = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const d0 = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
+  const dayDiff = Math.round((d1 - d0) / 86400000);
+  const t = formatTime(date);
+  if (dayDiff <= 0) return t + ' (azi)';
+  if (dayDiff === 1) return t + ' (mâine)';
+  return t + ' (+' + dayDiff + ' zile)';
 }
 
 function setYeastType(type){
@@ -480,6 +518,27 @@ function update(){
   let fermTxt = h1 + 'h @ ' + t1 + '°C';
   if (stage2on) fermTxt += '  +  ' + h2 + 'h @ ' + t2 + '°C';
   document.getElementById('outFermSummary').textContent = fermTxt;
+
+  // Ora de gata-de-copt, calculată de la ora de start
+  const startTimeStr = document.getElementById('startTime').value;
+  if (startTimeStr){
+    const [sh, sm] = startTimeStr.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setHours(sh, sm, 0, 0);
+
+    const ready1 = new Date(startDate.getTime() + h1 * 3600000);
+    const readyFinal = stage2on ? new Date(ready1.getTime() + h2 * 3600000) : ready1;
+
+    let readyLine = 'Start ' + formatTime(startDate);
+    if (stage2on){
+      readyLine += ' → faza 1 gata ' + formatWithDay(ready1, startDate);
+      readyLine += ' → formezi bilele → <b>gata de copt ' + formatWithDay(readyFinal, startDate) + '</b>';
+    } else {
+      readyLine += ' → <b>gata de copt ' + formatWithDay(readyFinal, startDate) + '</b>';
+    }
+    document.getElementById('outReadyLine').innerHTML = readyLine;
+    document.getElementById('startTimeVal').textContent = '→ gata ' + formatWithDay(readyFinal, startDate);
+  }
 
   lastComputed = {
     balls, weight, hydration: hyd, salt: saltPct, oil: oilPct,
@@ -630,7 +689,7 @@ async function clearAllRecipes(){
   }
 }
 
-update();
+setStartNow();
 initRecipeListener();
 </script>
 </body>
