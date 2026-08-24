@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comandă Aluat — Nuvola Super</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,600&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --char:#1c1815;
+    --char2:#241e19;
+    --char3:#2e2620;
+    --flour:#f2ebdd;
+    --flour-dim:#c9bfa9;
+    --tomato:#d4491f;
+    --tomato-dim:#7a2a13;
+    --basil:#7a9a4a;
+    --line: rgba(242,235,221,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(212,73,31,0.10), transparent 45%),
+      radial-gradient(ellipse at 90% 10%, rgba(122,154,74,0.06), transparent 40%),
+      var(--char);
+    color:var(--flour);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    padding:0 0 64px 0;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:28px 18px 0;}
+
+  /* Hero */
+  .hero{padding:8px 4px 22px; border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--tomato); margin:0 0 10px;
+  }
+  h1{
+    font-family:'Fraunces', serif; font-weight:700; font-style:italic;
+    font-size:clamp(30px,8vw,40px); line-height:1.04; margin:0 0 8px; color:var(--flour);
+  }
+  .tagline{color:var(--flour-dim); font-size:14.5px; line-height:1.5; margin:0; max-width:42ch;}
+
+  /* Sections */
+  section.card{
+    margin-top:22px; background:var(--char2); border:1px solid var(--line);
+    border-radius:14px; padding:20px 18px;
+  }
+  .section-title{
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--flour-dim); margin:0 0 16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title::before{content:''; width:6px; height:6px; background:var(--tomato); border-radius:1px; display:inline-block;}
+
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  .field-label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:14px; color:var(--flour); margin-bottom:8px; font-weight:500;
+  }
+  .field-value{font-family:'Space Mono',monospace; color:var(--tomato); font-weight:700; font-size:14px;}
+
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
+    background:var(--char3); outline:none; margin:6px 0 2px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+    background:var(--flour); border:3px solid var(--tomato); cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:20px; height:20px; border-radius:50%; background:var(--flour);
+    border:3px solid var(--tomato); cursor:pointer;
+  }
+  .hint{font-size:12px; color:var(--flour-dim); margin-top:6px; line-height:1.4;}
+
+  .stepper{display:flex; align-items:center; gap:14px;}
+  .stepper button{
+    width:40px; height:40px; border-radius:10px; border:1px solid var(--line);
+    background:var(--char3); color:var(--flour); font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .stepper button:active{background:var(--tomato-dim);}
+  .stepper .num{
+    font-family:'Space Mono',monospace; font-size:22px; font-weight:700;
+    min-width:44px; text-align:center;
+  }
+
+  .seg{display:flex; gap:8px; flex-wrap:wrap;}
+  .seg button{
+    flex:1; min-width:100px; padding:10px 12px; border-radius:9px;
+    border:1px solid var(--line); background:var(--char3); color:var(--flour-dim);
+    font-family:'Work Sans',sans-serif; font-size:13.5px; font-weight:500; cursor:pointer;
+  }
+  .seg button.active{
+    background:var(--tomato); border-color:var(--tomato); color:var(--flour); font-weight:600;
+  }
+
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+
+  details{margin-top:4px;}
+  summary{
+    cursor:pointer; font-size:13px; color:var(--flour-dim);
+    font-family:'Space Mono',monospace; letter-spacing:.03em; padding:6px 0;
+    list-style:none;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:'+ '; color:var(--tomato);}
+  details[open] summary::before{content:'− ';}
+  details .field{margin-top:14px;}
+
+  .checkline{display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--flour-dim); margin-top:14px;}
+  .checkline input{accent-color:var(--tomato); width:16px; height:16px;}
+
+  /* Ticket */
+  .ticket{
+    margin-top:26px; background:var(--flour); color:var(--char);
+    border-radius:4px; position:relative; padding:26px 20px 22px;
+    box-shadow:0 20px 40px -18px rgba(0,0,0,0.6);
+  }
+  .ticket::before, .ticket::after{
+    content:''; position:absolute; left:0; right:0; height:14px;
+    background-image:radial-gradient(circle at 8px 50%, var(--char) 6px, transparent 6.5px);
+    background-size:16px 14px; background-repeat:repeat-x;
+  }
+  .ticket::before{top:-7px;}
+  .ticket::after{bottom:-7px; transform:rotate(180deg);}
+  .ticket-head{
+    text-align:center; font-family:'Space Mono',monospace; font-size:11px;
+    letter-spacing:.14em; text-transform:uppercase; color:#6b6255; margin-bottom:4px;
+  }
+  .ticket-title{
+    text-align:center; font-family:'Fraunces',serif; font-style:italic; font-weight:600;
+    font-size:19px; margin:2px 0 16px; color:var(--char);
+  }
+  .tear{border-top:1.5px dashed #b9ae98; margin:14px 0;}
+  .ing-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:9px 0; border-bottom:1px dashed #d9d0bd;
+  }
+  .ing-row:last-child{border-bottom:none;}
+  .ing-name{font-size:14px; font-weight:600; letter-spacing:.02em;}
+  .ing-sub{display:block; font-size:11px; font-weight:400; color:#7a7062; margin-top:2px;}
+  .ing-amt{font-family:'Space Mono',monospace; font-size:19px; font-weight:700;}
+  .ing-amt span{font-size:12px; font-weight:400; margin-left:2px;}
+  .ticket-total{
+    display:flex; justify-content:space-between; margin-top:14px; padding-top:10px;
+    border-top:1.5px solid var(--char); font-family:'Space Mono',monospace; font-size:12.5px;
+  }
+  .ticket-foot{
+    text-align:center; font-size:11px; color:#8a806f; margin-top:16px;
+    font-family:'Space Mono',monospace; letter-spacing:.05em;
+  }
+
+  .tips{margin-top:18px; font-size:12.5px; color:var(--flour-dim); line-height:1.6;}
+  .tips b{color:var(--flour);}
+
+  .yeast-badge{
+    display:inline-block; margin-top:10px; font-family:'Space Mono',monospace;
+    font-size:11px; color:var(--basil); border:1px solid rgba(122,154,74,0.4);
+    padding:4px 9px; border-radius:20px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <p class="eyebrow">Caputo Nuvola Super · calcul aluat</p>
+    <h1>Comanda de aluat</h1>
+    <p class="tagline">Introduci câte pizze vrei și cum fermentezi — primești rețeta exactă, ca un bon de comandă.</p>
+  </div>
+
+  <section class="card">
+    <p class="section-title">Câte pizze</p>
+    <div class="field">
+      <div class="field-label">Bile de aluat (paline) <span class="field-value" id="ballsVal">4</span></div>
+      <div class="stepper">
+        <button onclick="changeBalls(-1)">−</button>
+        <div class="num" id="ballsNum">4</div>
+        <button onclick="changeBalls(1)">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Greutate / bilă <span class="field-value" id="weightVal">270 g</span></div>
+      <input type="range" id="weight" min="180" max="400" step="10" value="270" oninput="update()">
+      <p class="hint">Napoletană clasică ~250–280g. Pentru blat mai gros, urcă spre 320–350g.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <p class="section-title">Hidratare &amp; sare</p>
+    <div class="field">
+      <div class="field-label">Hidratare <span class="field-value" id="hydVal">70%</span></div>
+      <input type="range" id="hydration" min="55" max="80" step="1" value="70" oninput="update()">
+      <p class="hint">Nuvola Super e o făină "forte" (W mare) — ține bine 68–75% hidratare, chiar și pentru cine nu e expert.</p>
+    </div>
+    <div class="field">
+      <div class="field-label">Sare <span class="field-value" id="saltVal">2.8%</span></div>
+      <input type="range" id="salt" min="2" max="3.5" step="0.1" value="2.8" oninput="update()">
+    </div>
+    <details>
+      <summary>Opțiuni avansate</summary>
+      <div class="field">
+        <div class="field-label">Ulei de măsline <span class="field-value" id="oilVal">0%</span></div>
+        <input type="range" id="oil" min="0" max="6" step="0.5" value="0" oninput="update()">
+        <p class="hint">Lasă 0% pentru napoletană clasică. Pune 3–5% pentru pizza la tavă (teglia).</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <p class="section-title">Fermentare</p>
+    <div class="field">
+      <div class="field-label">Faza 1 — durată <span class="field-value" id="h1Val">24 h</span></div>
+      <input type="range" id="h1" min="1" max="96" step="1" value="24" oninput="update()">
+    </div>
+    <div class="field">
+      <div class="field-label">Faza 1 — temperatură <span class="field-value" id="t1Val">4°C</span></div>
+      <input type="range" id="t1" min="2" max="30" step="1" value="4" oninput="update()">
+      <p class="hint">4°C ≈ frigider · 18–22°C ≈ temperatura camerei</p>
+    </div>
+    <label class="checkline">
+      <input type="checkbox" id="stage2on" onchange="update()">
+      Adaug fază 2 (după ce formez bilele, la temperatura camerei)
+    </label>
+    <div id="stage2box" style="display:none; margin-top:16px;">
+      <div class="field">
+        <div class="field-label">Faza 2 — durată <span class="field-value" id="h2Val">3 h</span></div>
+        <input type="range" id="h2" min="1" max="24" step="1" value="3" oninput="update()">
+      </div>
+      <div class="field">
+        <div class="field-label">Faza 2 — temperatură <span class="field-value" id="t2Val">21°C</span></div>
+        <input type="range" id="t2" min="2" max="30" step="1" value="21" oninput="update()">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <p class="section-title">Drojdie</p>
+    <div class="seg">
+      <button id="btnFresh" class="active" onclick="setYeastType('proaspata')">Proaspătă</button>
+      <button id="btnDry" onclick="setYeastType('uscata')">Uscată</button>
+    </div>
+    <label class="checkline">
+      <input type="checkbox" id="manualOn" onchange="update()">
+      Ajustez procentul de drojdie manual
+    </label>
+    <div id="manualBox" style="display:none; margin-top:16px;">
+      <div class="field">
+        <div class="field-label">Drojdie proaspătă <span class="field-value" id="manualVal">0.30%</span></div>
+        <input type="range" id="manualPct" min="0.02" max="2" step="0.01" value="0.30" oninput="update()">
+      </div>
+    </div>
+    <span class="yeast-badge" id="yeastBadge">estimat automat din durată + temperatură</span>
+  </section>
+
+  <div class="ticket">
+    <p class="ticket-head">Buon appetito</p>
+    <p class="ticket-title">Rețeta ta de aluat</p>
+
+    <div class="ing-row">
+      <div class="ing-name">Făină<span class="ing-sub">Caputo Nuvola Super</span></div>
+      <div class="ing-amt" id="outFlour">—<span>g</span></div>
+    </div>
+    <div class="ing-row">
+      <div class="ing-name">Apă<span class="ing-sub" id="outHydSub">70% hidratare</span></div>
+      <div class="ing-amt" id="outWater">—<span>g</span></div>
+    </div>
+    <div class="ing-row">
+      <div class="ing-name">Sare<span class="ing-sub" id="outSaltSub">2.8%</span></div>
+      <div class="ing-amt" id="outSalt">—<span>g</span></div>
+    </div>
+    <div class="ing-row" id="oilRow" style="display:none;">
+      <div class="ing-name">Ulei de măsline</div>
+      <div class="ing-amt" id="outOil">—<span>g</span></div>
+    </div>
+    <div class="ing-row">
+      <div class="ing-name" id="yeastLabel">Drojdie proaspătă<span class="ing-sub" id="outYeastSub">—% din făină</span></div>
+      <div class="ing-amt" id="outYeast">—<span>g</span></div>
+    </div>
+
+    <div class="tear"></div>
+    <div class="ticket-total">
+      <span id="outBallsSummary">4 bile × 270g</span>
+      <span id="outTotal">— g total</span>
+    </div>
+    <p class="ticket-foot" id="outFermSummary">24h @ 4°C</p>
+  </div>
+
+  <p class="tips">
+    <b>Notă:</b> procentul de drojdie e o estimare pornind de la durată și temperatură — Nuvola Super e o făină puternică și tolerează fermentări lungi. Dacă aluatul tău crește vizibil mai repede sau mai încet decât te aștepți, folosește ajustarea manuală data viitoare și ține minte ce procent a funcționat. Sarea se adaugă de obicei spre finalul frământării, nu direct peste drojdie.
+  </p>
+
+</div>
+
+<script>
+let yeastType = 'proaspata';
+
+function changeBalls(delta){
+  const el = document.getElementById('ballsNum');
+  let v = parseInt(el.textContent) + delta;
+  v = Math.max(1, Math.min(40, v));
+  el.textContent = v;
+  update();
+}
+
+function setYeastType(type){
+  yeastType = type;
+  document.getElementById('btnFresh').classList.toggle('active', type==='proaspata');
+  document.getElementById('btnDry').classList.toggle('active', type==='uscata');
+  update();
+}
+
+function effectiveHours(h, t){
+  const rate = Math.pow(2.5, (t - 21) / 10);
+  return h * rate;
+}
+
+function computeFreshYeastPercent(){
+  const h1 = parseFloat(document.getElementById('h1').value);
+  const t1 = parseFloat(document.getElementById('t1').value);
+  let eff = effectiveHours(h1, t1);
+
+  const stage2on = document.getElementById('stage2on').checked;
+  if (stage2on){
+    const h2 = parseFloat(document.getElementById('h2').value);
+    const t2 = parseFloat(document.getElementById('t2').value);
+    eff += effectiveHours(h2, t2);
+  }
+  let y = 10.5 * Math.pow(Math.max(eff, 0.4), -1.46);
+  return Math.min(Math.max(y, 0.01), 3);
+}
+
+function update(){
+  const balls = parseInt(document.getElementById('ballsNum').textContent);
+  const weight = parseFloat(document.getElementById('weight').value);
+  const hyd = parseFloat(document.getElementById('hydration').value);
+  const saltPct = parseFloat(document.getElementById('salt').value);
+  const oilPct = parseFloat(document.getElementById('oil').value);
+  const h1 = parseFloat(document.getElementById('h1').value);
+  const t1 = parseFloat(document.getElementById('t1').value);
+  const stage2on = document.getElementById('stage2on').checked;
+  const manualOn = document.getElementById('manualOn').checked;
+
+  document.getElementById('ballsVal').textContent = balls;
+  document.getElementById('weightVal').textContent = weight + ' g';
+  document.getElementById('hydVal').textContent = hyd + '%';
+  document.getElementById('saltVal').textContent = saltPct.toFixed(1) + '%';
+  document.getElementById('oilVal').textContent = oilPct.toFixed(1) + '%';
+  document.getElementById('h1Val').textContent = h1 + ' h';
+  document.getElementById('t1Val').textContent = t1 + '°C';
+
+  document.getElementById('stage2box').style.display = stage2on ? 'block' : 'none';
+  let h2 = 0, t2 = 21;
+  if (stage2on){
+    h2 = parseFloat(document.getElementById('h2').value);
+    t2 = parseFloat(document.getElementById('t2').value);
+    document.getElementById('h2Val').textContent = h2 + ' h';
+    document.getElementById('t2Val').textContent = t2 + '°C';
+  }
+
+  document.getElementById('manualBox').style.display = manualOn ? 'block' : 'none';
+
+  let freshPct;
+  if (manualOn){
+    freshPct = parseFloat(document.getElementById('manualPct').value);
+    document.getElementById('manualVal').textContent = freshPct.toFixed(2) + '%';
+    document.getElementById('yeastBadge').textContent = 'setat manual';
+  } else {
+    freshPct = computeFreshYeastPercent();
+    document.getElementById('yeastBadge').textContent = 'estimat automat din durată + temperatură';
+  }
+
+  const usedPct = (yeastType === 'proaspata') ? freshPct : freshPct / 3;
+
+  const totalDough = balls * weight;
+  const totalPercent = 100 + hyd + saltPct + oilPct + usedPct;
+  const flour = totalDough / (totalPercent / 100);
+  const water = flour * hyd / 100;
+  const salt = flour * saltPct / 100;
+  const oil = flour * oilPct / 100;
+  const yeastG = flour * usedPct / 100;
+
+  document.getElementById('outFlour').innerHTML = Math.round(flour) + '<span>g</span>';
+  document.getElementById('outWater').innerHTML = Math.round(water) + '<span>g</span>';
+  document.getElementById('outSalt').innerHTML = salt.toFixed(1) + '<span>g</span>';
+  document.getElementById('outHydSub').textContent = hyd + '% hidratare';
+  document.getElementById('outSaltSub').textContent = saltPct.toFixed(1) + '%';
+
+  document.getElementById('oilRow').style.display = oilPct > 0 ? 'flex' : 'none';
+  document.getElementById('outOil').innerHTML = oil.toFixed(1) + '<span>g</span>';
+
+  document.getElementById('yeastLabel').innerHTML =
+    (yeastType === 'proaspata' ? 'Drojdie proaspătă' : 'Drojdie uscată')
+    + '<span class="ing-sub" id="outYeastSub">' + usedPct.toFixed(2) + '% din făină</span>';
+  document.getElementById('outYeast').innerHTML =
+    (yeastG < 1 ? yeastG.toFixed(2) : yeastG.toFixed(1)) + '<span>g</span>';
+
+  document.getElementById('outBallsSummary').textContent = balls + ' bile × ' + weight + 'g';
+  document.getElementById('outTotal').textContent = Math.round(totalDough) + ' g total';
+
+  let fermTxt = h1 + 'h @ ' + t1 + '°C';
+  if (stage2on) fermTxt += '  +  ' + h2 + 'h @ ' + t2 + '°C';
+  document.getElementById('outFermSummary').textContent = fermTxt;
+}
+
+update();
+</script>
+</body>
+</html>
