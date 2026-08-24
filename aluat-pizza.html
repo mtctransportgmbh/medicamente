@@ -6,6 +6,8 @@
 <title>Comandă Aluat — Nuvola Super</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,600&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --char:#1c1815;
@@ -356,6 +358,20 @@
 </div>
 
 <script>
+// Firebase: același proiect ca la medicamente, dar colecție complet separată —
+// nu atinge deloc datele/colecțiile folosite de aplicația de medicamente.
+const firebaseConfig = {
+  apiKey: "AIzaSyA1uIWWXUFU2T2IjeoBL5zYUfZAqQKMjO8",
+  authDomain: "medicamente-3ed4a.firebaseapp.com",
+  projectId: "medicamente-3ed4a",
+  storageBucket: "medicamente-3ed4a.firebasestorage.app",
+  messagingSenderId: "532379249934",
+  appId: "1:532379249934:web:0b542b33802b583b03bb5f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const RECIPES_COLLECTION = 'retetePizza';
+
 let yeastType = 'proaspata';
 
 function changeBalls(delta){
@@ -480,6 +496,7 @@ function update(){
 }
 
 let lastComputed = null;
+let currentRecipes = [];
 
 function escapeHtml(str){
   const d = document.createElement('div');
@@ -491,60 +508,42 @@ async function saveRecipe(){
   const statusEl = document.getElementById('saveStatus');
   const nameInput = document.getElementById('recipeName');
   const name = nameInput.value.trim() || (lastComputed.balls + '×' + lastComputed.weight + 'g · ' + lastComputed.fermTxt);
-  const id = 'r' + Date.now();
-  const recipe = Object.assign({ id, name, savedAt: new Date().toISOString(), favorite: false }, lastComputed);
+  const recipe = Object.assign({ name, savedAt: new Date().toISOString(), favorite: false }, lastComputed);
 
   statusEl.textContent = 'Se salvează…';
   try{
-    const result = await window.storage.set('recipe:' + id, JSON.stringify(recipe), false);
-    if (!result) throw new Error('no result');
+    await db.collection(RECIPES_COLLECTION).add(recipe);
     nameInput.value = '';
     statusEl.textContent = 'Salvat ✓';
-    await loadRecipeList();
     setTimeout(()=>{ if (statusEl.textContent === 'Salvat ✓') statusEl.textContent = ''; }, 2500);
   } catch(e){
     console.error('Save error:', e);
-    statusEl.textContent = 'Nu am putut salva — încearcă din nou.';
+    statusEl.textContent = 'Nu am putut salva în baza de date — verifică rețeaua sau regulile Firestore.';
   }
 }
 
-async function loadRecipeList(){
-  const container = document.getElementById('recipeList');
-  try{
-    const listResult = await window.storage.list('recipe:', false);
-    const keys = (listResult && listResult.keys) ? listResult.keys : [];
-
-    if (keys.length === 0){
-      container.innerHTML = '<p class="empty-state">Nicio rețetă salvată încă. Salvează una mai sus după ce reglezi parametrii.</p>';
-      document.getElementById('clearAllBtn').style.display = 'none';
-      return;
-    }
-
-    const recipes = [];
-    for (const k of keys){
-      try{
-        const r = await window.storage.get(k, false);
-        if (r && r.value) recipes.push(JSON.parse(r.value));
-      } catch(e){ /* skip unreadable entry */ }
-    }
-
-    recipes.sort((a,b) => {
-      if (a.favorite !== b.favorite) return b.favorite - a.favorite;
+function initRecipeListener(){
+  db.collection(RECIPES_COLLECTION).onSnapshot(snapshot => {
+    currentRecipes = [];
+    snapshot.forEach(doc => {
+      currentRecipes.push(Object.assign({ id: doc.id }, doc.data()));
+    });
+    currentRecipes.sort((a,b) => {
+      if (a.favorite !== b.favorite) return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0);
       return new Date(b.savedAt) - new Date(a.savedAt);
     });
-
-    renderRecipeList(recipes);
-    document.getElementById('clearAllBtn').style.display = recipes.length ? 'block' : 'none';
-  } catch(e){
-    console.error('List error:', e);
-    container.innerHTML = '<p class="empty-state">Nu am putut încărca rețetele salvate.</p>';
-  }
+    renderRecipeList(currentRecipes);
+    document.getElementById('clearAllBtn').style.display = currentRecipes.length ? 'block' : 'none';
+  }, err => {
+    console.error('Listener error:', err);
+    document.getElementById('recipeList').innerHTML = '<p class="empty-state">Nu am putut încărca rețetele din baza de date.</p>';
+  });
 }
 
 function renderRecipeList(recipes){
   const container = document.getElementById('recipeList');
   if (!recipes.length){
-    container.innerHTML = '<p class="empty-state">Nicio rețetă salvată încă.</p>';
+    container.innerHTML = '<p class="empty-state">Nicio rețetă salvată încă. Salvează una mai sus după ce reglezi parametrii.</p>';
     return;
   }
   container.innerHTML = recipes.map(r => {
@@ -565,51 +564,42 @@ function renderRecipeList(recipes){
   }).join('');
 }
 
-async function loadRecipe(id){
-  try{
-    const r = await window.storage.get('recipe:' + id, false);
-    if (!r) return;
-    const rec = JSON.parse(r.value);
+function loadRecipe(id){
+  const rec = currentRecipes.find(r => r.id === id);
+  if (!rec) return;
 
-    document.getElementById('ballsNum').textContent = rec.balls;
-    document.getElementById('weight').value = rec.weight;
-    document.getElementById('hydration').value = rec.hydration;
-    document.getElementById('salt').value = rec.salt;
-    document.getElementById('oil').value = rec.oil;
-    document.getElementById('h1').value = rec.h1;
-    document.getElementById('t1').value = rec.t1;
-    document.getElementById('stage2on').checked = !!rec.stage2on;
-    if (rec.stage2on){
-      document.getElementById('h2').value = rec.h2;
-      document.getElementById('t2').value = rec.t2;
-    }
-    document.getElementById('manualOn').checked = !!rec.manualOn;
-    if (rec.manualOn && rec.manualPct != null){
-      document.getElementById('manualPct').value = rec.manualPct;
-    }
-    setYeastType(rec.yeastType);
-    update();
-    document.querySelector('.hero').scrollIntoView({behavior:'smooth'});
-  } catch(e){
-    console.error('Load error:', e);
+  document.getElementById('ballsNum').textContent = rec.balls;
+  document.getElementById('weight').value = rec.weight;
+  document.getElementById('hydration').value = rec.hydration;
+  document.getElementById('salt').value = rec.salt;
+  document.getElementById('oil').value = rec.oil;
+  document.getElementById('h1').value = rec.h1;
+  document.getElementById('t1').value = rec.t1;
+  document.getElementById('stage2on').checked = !!rec.stage2on;
+  if (rec.stage2on){
+    document.getElementById('h2').value = rec.h2;
+    document.getElementById('t2').value = rec.t2;
   }
+  document.getElementById('manualOn').checked = !!rec.manualOn;
+  if (rec.manualOn && rec.manualPct != null){
+    document.getElementById('manualPct').value = rec.manualPct;
+  }
+  setYeastType(rec.yeastType);
+  update();
+  document.querySelector('.hero').scrollIntoView({behavior:'smooth'});
 }
 
 async function toggleFavorite(id){
+  const rec = currentRecipes.find(r => r.id === id);
+  if (!rec) return;
   try{
-    const r = await window.storage.get('recipe:' + id, false);
-    if (!r) return;
-    const rec = JSON.parse(r.value);
-    rec.favorite = !rec.favorite;
-    await window.storage.set('recipe:' + id, JSON.stringify(rec), false);
-    await loadRecipeList();
+    await db.collection(RECIPES_COLLECTION).doc(id).update({ favorite: !rec.favorite });
   } catch(e){ console.error('Favorite error:', e); }
 }
 
 async function deleteRecipe(id){
   try{
-    await window.storage.delete('recipe:' + id, false);
-    await loadRecipeList();
+    await db.collection(RECIPES_COLLECTION).doc(id).delete();
   } catch(e){ console.error('Delete error:', e); }
 }
 
@@ -630,13 +620,10 @@ async function clearAllRecipes(){
   clearConfirming = false;
   btn.textContent = 'Se șterge…';
   try{
-    const listResult = await window.storage.list('recipe:', false);
-    const keys = (listResult && listResult.keys) ? listResult.keys : [];
-    for (const k of keys){
-      try{ await window.storage.delete(k, false); } catch(e){ /* continue */ }
-    }
+    const batch = db.batch();
+    currentRecipes.forEach(r => batch.delete(db.collection(RECIPES_COLLECTION).doc(r.id)));
+    await batch.commit();
     btn.classList.remove('confirming');
-    await loadRecipeList();
   } catch(e){
     console.error('Clear all error:', e);
     btn.textContent = 'Șterge toate rețetele';
@@ -644,7 +631,7 @@ async function clearAllRecipes(){
 }
 
 update();
-loadRecipeList();
+initRecipeListener();
 </script>
 </body>
 </html>
