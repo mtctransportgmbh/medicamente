@@ -147,6 +147,11 @@
     border-radius:8px; padding:9px 10px; margin:0 0 16px; line-height:1.5;
   }
   .ticket-ready b{font-size:14.5px;}
+  .ticket-warn{
+    text-align:center; font-family:'Space Mono',monospace; font-size:11.5px; font-weight:600;
+    color:#8a3b1f; background:rgba(212,73,31,0.06); border:1px dashed rgba(212,73,31,0.35);
+    border-radius:8px; padding:8px 10px; margin:0 0 16px; line-height:1.5;
+  }
   .ing-row{
     display:flex; justify-content:space-between; align-items:baseline;
     padding:9px 0; border-bottom:1px dashed #d9d0bd;
@@ -268,35 +273,36 @@
   <section class="card">
     <p class="section-title">Fermentare</p>
     <div class="field">
-      <div class="field-label">Ora de start <span class="field-value" id="startTimeVal">→ gata —</span></div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <input type="time" id="startTime" oninput="update()"
-          style="flex:1; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--char3); color:var(--flour); font-family:'Space Mono',monospace; font-size:15px;">
-        <button type="button" onclick="setStartNow()"
-          style="padding:10px 14px; border-radius:9px; border:1px solid var(--line); background:var(--char3); color:var(--flour-dim); font-size:12.5px; font-family:'Work Sans',sans-serif; cursor:pointer; white-space:nowrap;">Acum</button>
+      <div class="field-label">Vreau să coc <span class="field-value" id="bakeTimeVal">—</span></div>
+      <div class="row2">
+        <input type="date" id="bakeDate" oninput="update()"
+          style="padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--char3); color:var(--flour); font-family:'Space Mono',monospace; font-size:14px; width:100%; color-scheme:dark;">
+        <input type="time" id="bakeTime" oninput="update()"
+          style="padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--char3); color:var(--flour); font-family:'Space Mono',monospace; font-size:15px; width:100%; color-scheme:dark;">
       </div>
-      <p class="hint">Ora la care pui aluatul la frământat / fermentat — restul se calculează automat de acolo.</p>
+      <p class="hint">Data și ora la care vrei să bagi pizza în cuptor. Calculăm înapoi exact când să pui aluatul la frigider și când să-l scoți.</p>
     </div>
     <div class="field">
-      <div class="field-label">Faza 1 — durată <span class="field-value" id="h1Val">24 h</span></div>
+      <div class="field-label">Timp în frigider <span class="field-value" id="h1Val">24 h</span></div>
       <input type="range" id="h1" min="1" max="96" step="1" value="24" oninput="update()">
     </div>
     <div class="field">
-      <div class="field-label">Faza 1 — temperatură <span class="field-value" id="t1Val">4°C</span></div>
+      <div class="field-label">Temperatura frigiderului <span class="field-value" id="t1Val">4°C</span></div>
       <input type="range" id="t1" min="2" max="30" step="1" value="4" oninput="update()">
-      <p class="hint">4°C ≈ frigider · 18–22°C ≈ temperatura camerei</p>
+      <p class="hint">4°C ≈ frigider normal. Dacă nu bagi deloc la frigider, poți urca aici spre temperatura camerei.</p>
     </div>
     <label class="checkline">
-      <input type="checkbox" id="stage2on" onchange="update()">
-      Adaug fază 2 (după ce formez bilele, la temperatura camerei)
+      <input type="checkbox" id="stage2on" checked onchange="update()">
+      Las aluatul și afară din frigider înainte de coacere (recomandat)
     </label>
-    <div id="stage2box" style="display:none; margin-top:16px;">
+    <div id="stage2box" style="margin-top:16px;">
       <div class="field">
-        <div class="field-label">Faza 2 — durată <span class="field-value" id="h2Val">3 h</span></div>
+        <div class="field-label">Timp afară din frigider, până la coacere <span class="field-value" id="h2Val">3 h</span></div>
         <input type="range" id="h2" min="1" max="24" step="1" value="3" oninput="update()">
+        <p class="hint">Cât stă la temperatura camerei după ce-l scoți — timpul în care formezi bilele și se relaxează glutenul, de obicei 2–4h.</p>
       </div>
       <div class="field">
-        <div class="field-label">Faza 2 — temperatură <span class="field-value" id="t2Val">21°C</span></div>
+        <div class="field-label">Temperatura camerei <span class="field-value" id="t2Val">21°C</span></div>
         <input type="range" id="t2" min="2" max="30" step="1" value="21" oninput="update()">
       </div>
     </div>
@@ -324,7 +330,8 @@
   <div class="ticket">
     <p class="ticket-head">Buon appetito</p>
     <p class="ticket-title">Rețeta ta de aluat</p>
-    <p class="ticket-ready" id="outReadyLine">Start —:— → gata de copt —:—</p>
+    <p class="ticket-ready" id="outReadyLine">Framânți —:— → scoți din frigider —:— → coci —:—</p>
+    <p class="ticket-warn" id="outWarnLine" style="display:none;"></p>
 
     <div class="ing-row">
       <div class="ing-name">Făină<span class="ing-sub">Caputo Nuvola Super</span></div>
@@ -399,15 +406,12 @@ function changeBalls(delta){
   update();
 }
 
-function setStartNow(){
-  const now = new Date();
-  document.getElementById('startTime').value =
-    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  update();
-}
-
 function formatTime(date){
   return String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
+}
+
+function formatDateInput(date){
+  return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
 }
 
 function formatWithDay(date, refDate){
@@ -415,9 +419,29 @@ function formatWithDay(date, refDate){
   const d0 = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
   const dayDiff = Math.round((d1 - d0) / 86400000);
   const t = formatTime(date);
-  if (dayDiff <= 0) return t + ' (azi)';
+  if (dayDiff === 0) return t + ' (azi)';
   if (dayDiff === 1) return t + ' (mâine)';
-  return t + ' (+' + dayDiff + ' zile)';
+  if (dayDiff === -1) return t + ' (ieri)';
+  if (dayDiff > 1) return t + ' (+' + dayDiff + ' zile)';
+  return t + ' (' + dayDiff + ' zile)';
+}
+
+function formatDurationAgo(ms){
+  const totalMin = Math.round(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h > 0 && m > 0) return h + 'h ' + m + 'min';
+  if (h > 0) return h + 'h';
+  return m + 'min';
+}
+
+function initBakeDefault(){
+  const h1default = parseFloat(document.getElementById('h1').value);
+  const h2default = document.getElementById('stage2on').checked ? parseFloat(document.getElementById('h2').value) : 0;
+  const target = new Date(Date.now() + (h1default + h2default) * 3600000);
+  document.getElementById('bakeDate').value = formatDateInput(target);
+  document.getElementById('bakeTime').value = formatTime(target);
+  update();
 }
 
 function setYeastType(type){
@@ -515,29 +539,40 @@ function update(){
   document.getElementById('outBallsSummary').textContent = balls + ' bile × ' + weight + 'g';
   document.getElementById('outTotal').textContent = Math.round(totalDough) + ' g total';
 
-  let fermTxt = h1 + 'h @ ' + t1 + '°C';
-  if (stage2on) fermTxt += '  +  ' + h2 + 'h @ ' + t2 + '°C';
+  let fermTxt = h1 + 'h frigider (' + t1 + '°C)';
+  if (stage2on) fermTxt += ' + ' + h2 + 'h afară (' + t2 + '°C)';
   document.getElementById('outFermSummary').textContent = fermTxt;
 
-  // Ora de gata-de-copt, calculată de la ora de start
-  const startTimeStr = document.getElementById('startTime').value;
-  if (startTimeStr){
-    const [sh, sm] = startTimeStr.split(':').map(Number);
-    const startDate = new Date();
-    startDate.setHours(sh, sm, 0, 0);
+  // Calculăm înapoi pornind de la ora la care vrei să coci
+  const bakeDateStr = document.getElementById('bakeDate').value;
+  const bakeTimeStr = document.getElementById('bakeTime').value;
+  const warnEl = document.getElementById('outWarnLine');
+  if (bakeDateStr && bakeTimeStr){
+    const [by, bmo, bd] = bakeDateStr.split('-').map(Number);
+    const [bh, bmin] = bakeTimeStr.split(':').map(Number);
+    const bakeDate = new Date(by, bmo - 1, bd, bh, bmin, 0, 0);
+    const now = new Date();
 
-    const ready1 = new Date(startDate.getTime() + h1 * 3600000);
-    const readyFinal = stage2on ? new Date(ready1.getTime() + h2 * 3600000) : ready1;
+    const h2ms = stage2on ? h2 * 3600000 : 0;
+    const takeOutDate = new Date(bakeDate.getTime() - h2ms);
+    const fridgeInDate = new Date(takeOutDate.getTime() - h1 * 3600000);
 
-    let readyLine = 'Start ' + formatTime(startDate);
+    let readyLine = 'Framânți și bagi la frigider ' + formatWithDay(fridgeInDate, now);
     if (stage2on){
-      readyLine += ' → faza 1 gata ' + formatWithDay(ready1, startDate);
-      readyLine += ' → formezi bilele → <b>gata de copt ' + formatWithDay(readyFinal, startDate) + '</b>';
+      readyLine += ' → scoți din frigider ' + formatWithDay(takeOutDate, now);
+      readyLine += ' → <b>coci la ora dorită, ' + formatWithDay(bakeDate, now) + '</b>';
     } else {
-      readyLine += ' → <b>gata de copt ' + formatWithDay(readyFinal, startDate) + '</b>';
+      readyLine += ' → <b>coci direct din frigider la ' + formatWithDay(bakeDate, now) + '</b>';
     }
     document.getElementById('outReadyLine').innerHTML = readyLine;
-    document.getElementById('startTimeVal').textContent = '→ gata ' + formatWithDay(readyFinal, startDate);
+    document.getElementById('bakeTimeVal').textContent = formatWithDay(bakeDate, now);
+
+    if (fridgeInDate.getTime() < now.getTime() - 60000){
+      warnEl.style.display = 'block';
+      warnEl.textContent = '⚠ Nu mai e timp suficient — ar fi trebuit să pui deja aluatul la frigider, acum ' + formatDurationAgo(now.getTime() - fridgeInDate.getTime()) + '. Scurtează fermentarea sau alege o oră de coacere mai târzie.';
+    } else {
+      warnEl.style.display = 'none';
+    }
   }
 
   lastComputed = {
@@ -689,7 +724,7 @@ async function clearAllRecipes(){
   }
 }
 
-setStartNow();
+initBakeDefault();
 initRecipeListener();
 </script>
 </body>
