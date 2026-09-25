@@ -280,32 +280,16 @@
         <input type="time" id="bakeTime" oninput="update()"
           style="padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--char3); color:var(--flour); font-family:'Space Mono',monospace; font-size:15px; width:100%; color-scheme:dark;">
       </div>
-      <p class="hint">Data și ora la care vrei să bagi pizza în cuptor. Calculăm înapoi exact când să pui aluatul la frigider și când să-l scoți.</p>
+      <p class="hint">Data și ora la care vrei să bagi pizza în cuptor. Restul se calculează automat — nu mai reglezi nimic.</p>
     </div>
     <div class="field">
-      <div class="field-label">Timp în frigider <span class="field-value" id="h1Val">24 h</span></div>
-      <input type="range" id="h1" min="1" max="96" step="1" value="24" oninput="update()">
+      <div class="field-label">Timp în frigider <span class="field-value" id="autoFridgeVal">— h</span></div>
     </div>
     <div class="field">
-      <div class="field-label">Temperatura frigiderului <span class="field-value" id="t1Val">4°C</span></div>
-      <input type="range" id="t1" min="2" max="30" step="1" value="4" oninput="update()">
-      <p class="hint">4°C ≈ frigider normal. Dacă nu bagi deloc la frigider, poți urca aici spre temperatura camerei.</p>
+      <div class="field-label">Timp afară din frigider, până la coacere <span class="field-value" id="autoRoomVal">— h</span></div>
+      <p class="hint" id="autoScheduleNote">—</p>
     </div>
-    <label class="checkline">
-      <input type="checkbox" id="stage2on" checked onchange="update()">
-      Las aluatul și afară din frigider înainte de coacere (recomandat)
-    </label>
-    <div id="stage2box" style="margin-top:16px;">
-      <div class="field">
-        <div class="field-label">Timp afară din frigider, până la coacere <span class="field-value" id="h2Val">3 h</span></div>
-        <input type="range" id="h2" min="1" max="24" step="1" value="3" oninput="update()">
-        <p class="hint">Cât stă la temperatura camerei după ce-l scoți — timpul în care formezi bilele și se relaxează glutenul, de obicei 2–4h.</p>
-      </div>
-      <div class="field">
-        <div class="field-label">Temperatura camerei <span class="field-value" id="t2Val">21°C</span></div>
-        <input type="range" id="t2" min="2" max="30" step="1" value="21" oninput="update()">
-      </div>
-    </div>
+    <span class="yeast-badge">program ales automat, după recomandările Caputo pentru Nuvola Super</span>
   </section>
 
   <section class="card">
@@ -436,9 +420,9 @@ function formatDurationAgo(ms){
 }
 
 function initBakeDefault(){
-  const h1default = parseFloat(document.getElementById('h1').value);
-  const h2default = document.getElementById('stage2on').checked ? parseFloat(document.getElementById('h2').value) : 0;
-  const target = new Date(Date.now() + (h1default + h2default) * 3600000);
+  const target = new Date();
+  target.setDate(target.getDate() + 1);
+  target.setHours(19, 0, 0, 0);
   document.getElementById('bakeDate').value = formatDateInput(target);
   document.getElementById('bakeTime').value = formatTime(target);
   update();
@@ -456,19 +440,60 @@ function effectiveHours(h, t){
   return h * rate;
 }
 
-function computeFreshYeastPercent(){
-  const h1 = parseFloat(document.getElementById('h1').value);
-  const t1 = parseFloat(document.getElementById('t1').value);
-  let eff = effectiveHours(h1, t1);
-
-  const stage2on = document.getElementById('stage2on').checked;
-  if (stage2on){
-    const h2 = parseFloat(document.getElementById('h2').value);
-    const t2 = parseFloat(document.getElementById('t2').value);
-    eff += effectiveHours(h2, t2);
-  }
+function computeFreshYeastPercent(h1, t1, h2, t2){
+  const eff = effectiveHours(h1, t1) + effectiveHours(h2, t2);
   let y = 10.5 * Math.pow(Math.max(eff, 0.4), -1.46);
   return Math.min(Math.max(y, 0.01), 3);
+}
+
+// Program de fermentare ales automat, pe baza recomandărilor Caputo pentru Nuvola Super:
+// 24–72h la frigider (4°C), cu 48h ca punct de plecare "clasic", plus finalizare
+// 4–11h la temperatura camerei (~21°C) înainte de coacere. Se ajustează după timpul
+// disponibil până la ora de coacere aleasă.
+function computeAutoSchedule(leadHours){
+  const FRIDGE_TEMP = 4, ROOM_TEMP = 21;
+  const FRIDGE_IDEAL = 48, FRIDGE_MAX = 72, ROOM_IDEAL = 6, ROOM_SHORT = 4;
+  const L = leadHours;
+
+  if (L < 1){
+    return { fridge: 0, room: 0, fridgeTemp: FRIDGE_TEMP, roomTemp: ROOM_TEMP, feasible: false };
+  }
+
+  let fridge, room;
+  if (L >= FRIDGE_MAX + ROOM_IDEAL){
+    room = ROOM_IDEAL;
+    fridge = Math.min(FRIDGE_MAX, L - room);
+  } else if (L >= FRIDGE_IDEAL + ROOM_IDEAL){
+    room = ROOM_IDEAL;
+    fridge = L - room;
+  } else if (L >= 24 + ROOM_IDEAL){
+    room = ROOM_IDEAL;
+    fridge = L - room;
+  } else if (L >= 12 + ROOM_SHORT){
+    room = ROOM_SHORT;
+    fridge = L - room;
+  } else {
+    room = L;
+    fridge = 0;
+  }
+
+  fridge = Math.max(0, Math.round(fridge));
+  room = Math.max(0, Math.round(room * 2) / 2);
+
+  return { fridge, room, fridgeTemp: FRIDGE_TEMP, roomTemp: ROOM_TEMP, feasible: true };
+}
+
+function describeSchedule(fridge){
+  if (fridge >= 60){
+    return 'Ai ales o oră suficient de îndepărtată — am folosit aproape maximul recomandat de Caputo la frigider (72h), ca aluatul să nu stea degeaba.';
+  }
+  if (fridge >= 24){
+    return 'Program clasic pentru Nuvola Super: fermentare lungă la frigider, apoi finalizare la temperatura camerei chiar înainte de coacere.';
+  }
+  if (fridge > 0){
+    return 'Ai puțin timp la dispoziție — am scurtat fermentarea la frigider, dar am păstrat un minim de odihnă la temperatura camerei.';
+  }
+  return 'Timp foarte scurt până la coacere — am sărit peste frigider și am folosit doar fermentare la temperatura camerei (aluat expres, cu puțin mai multă drojdie).';
 }
 
 function update(){
@@ -477,9 +502,6 @@ function update(){
   const hyd = parseFloat(document.getElementById('hydration').value);
   const saltPct = parseFloat(document.getElementById('salt').value);
   const oilPct = parseFloat(document.getElementById('oil').value);
-  const h1 = parseFloat(document.getElementById('h1').value);
-  const t1 = parseFloat(document.getElementById('t1').value);
-  const stage2on = document.getElementById('stage2on').checked;
   const manualOn = document.getElementById('manualOn').checked;
 
   document.getElementById('ballsVal').textContent = balls;
@@ -487,17 +509,30 @@ function update(){
   document.getElementById('hydVal').textContent = hyd + '%';
   document.getElementById('saltVal').textContent = saltPct.toFixed(1) + '%';
   document.getElementById('oilVal').textContent = oilPct.toFixed(1) + '%';
-  document.getElementById('h1Val').textContent = h1 + ' h';
-  document.getElementById('t1Val').textContent = t1 + '°C';
 
-  document.getElementById('stage2box').style.display = stage2on ? 'block' : 'none';
-  let h2 = 0, t2 = 21;
-  if (stage2on){
-    h2 = parseFloat(document.getElementById('h2').value);
-    t2 = parseFloat(document.getElementById('t2').value);
-    document.getElementById('h2Val').textContent = h2 + ' h';
-    document.getElementById('t2Val').textContent = t2 + '°C';
+  // Ora la care vrei să coci → programul de fermentare se alege automat de acolo
+  const bakeDateStr = document.getElementById('bakeDate').value;
+  const bakeTimeStr = document.getElementById('bakeTime').value;
+  const now = new Date();
+
+  let h1 = 48, t1 = 4, h2 = 6, t2 = 21, hasFridge = true, feasible = true;
+  let bakeDate = null;
+
+  if (bakeDateStr && bakeTimeStr){
+    const [by, bmo, bd] = bakeDateStr.split('-').map(Number);
+    const [bh, bmin] = bakeTimeStr.split(':').map(Number);
+    bakeDate = new Date(by, bmo - 1, bd, bh, bmin, 0, 0);
+    const leadHours = (bakeDate.getTime() - now.getTime()) / 3600000;
+
+    const sched = computeAutoSchedule(leadHours);
+    h1 = sched.fridge; t1 = sched.fridgeTemp; h2 = sched.room; t2 = sched.roomTemp;
+    hasFridge = h1 >= 0.5;
+    feasible = sched.feasible;
   }
+
+  document.getElementById('autoFridgeVal').textContent = hasFridge ? (h1 + ' h @ ' + t1 + '°C') : 'fără frigider';
+  document.getElementById('autoRoomVal').textContent = h2 + ' h @ ' + t2 + '°C';
+  document.getElementById('autoScheduleNote').textContent = describeSchedule(h1);
 
   document.getElementById('manualBox').style.display = manualOn ? 'block' : 'none';
 
@@ -507,7 +542,7 @@ function update(){
     document.getElementById('manualVal').textContent = freshPct.toFixed(2) + '%';
     document.getElementById('yeastBadge').textContent = 'setat manual';
   } else {
-    freshPct = computeFreshYeastPercent();
+    freshPct = computeFreshYeastPercent(h1, t1, h2, t2);
     document.getElementById('yeastBadge').textContent = 'estimat automat din durată + temperatură';
   }
 
@@ -539,37 +574,31 @@ function update(){
   document.getElementById('outBallsSummary').textContent = balls + ' bile × ' + weight + 'g';
   document.getElementById('outTotal').textContent = Math.round(totalDough) + ' g total';
 
-  let fermTxt = h1 + 'h frigider (' + t1 + '°C)';
-  if (stage2on) fermTxt += ' + ' + h2 + 'h afară (' + t2 + '°C)';
+  let fermTxt = hasFridge ? (h1 + 'h frigider (' + t1 + '°C)') : 'fără frigider';
+  fermTxt += ' + ' + h2 + 'h afară (' + t2 + '°C)';
   document.getElementById('outFermSummary').textContent = fermTxt;
 
   // Calculăm înapoi pornind de la ora la care vrei să coci
-  const bakeDateStr = document.getElementById('bakeDate').value;
-  const bakeTimeStr = document.getElementById('bakeTime').value;
   const warnEl = document.getElementById('outWarnLine');
-  if (bakeDateStr && bakeTimeStr){
-    const [by, bmo, bd] = bakeDateStr.split('-').map(Number);
-    const [bh, bmin] = bakeTimeStr.split(':').map(Number);
-    const bakeDate = new Date(by, bmo - 1, bd, bh, bmin, 0, 0);
-    const now = new Date();
-
-    const h2ms = stage2on ? h2 * 3600000 : 0;
-    const takeOutDate = new Date(bakeDate.getTime() - h2ms);
+  if (bakeDate){
+    const takeOutDate = new Date(bakeDate.getTime() - h2 * 3600000);
     const fridgeInDate = new Date(takeOutDate.getTime() - h1 * 3600000);
 
-    let readyLine = 'Framânți și bagi la frigider ' + formatWithDay(fridgeInDate, now);
-    if (stage2on){
+    let readyLine;
+    if (hasFridge){
+      readyLine = 'Framânți și bagi la frigider ' + formatWithDay(fridgeInDate, now);
       readyLine += ' → scoți din frigider ' + formatWithDay(takeOutDate, now);
       readyLine += ' → <b>coci la ora dorită, ' + formatWithDay(bakeDate, now) + '</b>';
     } else {
-      readyLine += ' → <b>coci direct din frigider la ' + formatWithDay(bakeDate, now) + '</b>';
+      readyLine = 'Framânți aluatul ' + formatWithDay(fridgeInDate, now);
+      readyLine += ' → <b>coci la ora dorită, ' + formatWithDay(bakeDate, now) + '</b>';
     }
     document.getElementById('outReadyLine').innerHTML = readyLine;
     document.getElementById('bakeTimeVal').textContent = formatWithDay(bakeDate, now);
 
-    if (fridgeInDate.getTime() < now.getTime() - 60000){
+    if (!feasible){
       warnEl.style.display = 'block';
-      warnEl.textContent = '⚠ Nu mai e timp suficient — ar fi trebuit să pui deja aluatul la frigider, acum ' + formatDurationAgo(now.getTime() - fridgeInDate.getTime()) + '. Scurtează fermentarea sau alege o oră de coacere mai târzie.';
+      warnEl.textContent = '⚠ Ora aleasă e prea aproape sau a trecut deja — alege o oră mai târziu, ca să apuci să faci aluatul.';
     } else {
       warnEl.style.display = 'none';
     }
@@ -577,8 +606,8 @@ function update(){
 
   lastComputed = {
     balls, weight, hydration: hyd, salt: saltPct, oil: oilPct,
-    h1, t1, stage2on,
-    h2: stage2on ? h2 : null, t2: stage2on ? t2 : null,
+    h1, t1, hasFridge,
+    h2, t2,
     yeastType, manualOn,
     manualPct: manualOn ? parseFloat(document.getElementById('manualPct').value) : null,
     usedPct, fermTxt,
@@ -667,13 +696,6 @@ function loadRecipe(id){
   document.getElementById('hydration').value = rec.hydration;
   document.getElementById('salt').value = rec.salt;
   document.getElementById('oil').value = rec.oil;
-  document.getElementById('h1').value = rec.h1;
-  document.getElementById('t1').value = rec.t1;
-  document.getElementById('stage2on').checked = !!rec.stage2on;
-  if (rec.stage2on){
-    document.getElementById('h2').value = rec.h2;
-    document.getElementById('t2').value = rec.t2;
-  }
   document.getElementById('manualOn').checked = !!rec.manualOn;
   if (rec.manualOn && rec.manualPct != null){
     document.getElementById('manualPct').value = rec.manualPct;
