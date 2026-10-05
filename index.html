@@ -224,6 +224,23 @@ body{
 .ep-ibu{background:#eff6ff;color:#1d4ed8}
 .ep-para{background:#fffbeb;color:#b45309}
 
+/* ── EPISODE BANNER ── */
+.ep-banner{
+  border-radius:18px;padding:13px 16px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);
+}
+.ep-banner.active{background:linear-gradient(135deg,#fef9c3,#fde68a);border-left:4px solid #f59e0b}
+.ep-banner.done{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left:4px solid #22c55e}
+.ep-banner.hidden{display:none}
+.bn-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.bn-dot.a{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.25);animation:pgAmber 2s infinite}
+@keyframes pgAmber{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.35)}50%{box-shadow:0 0 0 6px rgba(245,158,11,0)}}
+.bn-dot.d{background:#22c55e}
+.bn-text{}
+.bn-title{font-size:.9rem;font-weight:800;color:#0f172a}
+.bn-sub{font-size:.75rem;color:#64748b;margin-top:2px;line-height:1.4}
+
 /* ── FOOTER ── */
 .footer{text-align:center;font-size:.68rem;color:#cbd5e1;padding-bottom:4px;display:flex;align-items:center;justify-content:center;gap:6px}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0}
@@ -311,6 +328,15 @@ body{
 </div>
 
 <div class="wrap">
+
+  <!-- EPISODE BANNER -->
+  <div class="ep-banner hidden" id="epBanner">
+    <div class="bn-dot" id="epDot"></div>
+    <div class="bn-text">
+      <div class="bn-title" id="epTitle"></div>
+      <div class="bn-sub" id="epSub"></div>
+    </div>
+  </div>
 
   <!-- IBUPROFEN CARD -->
   <div class="card c-ibu">
@@ -635,9 +661,47 @@ function updateCard(type, lastTs) {
   btnEl.classList.toggle("early", !canGive);
 }
 
+function updateEpisodeBanner() {
+  const banner = document.getElementById("epBanner");
+  const dot    = document.getElementById("epDot");
+  const title  = document.getElementById("epTitle");
+  const sub    = document.getElementById("epSub");
+
+  const eps = computeEpisodes();
+  if (eps.length === 0) {
+    banner.className = "ep-banner hidden";
+    return;
+  }
+
+  const now      = Date.now();
+  const lastEp   = eps[eps.length - 1];
+  const elapsed  = now - lastEp.lastTs;
+
+  if (elapsed < EPISODE_GAP) {
+    // Active episode
+    const duration = now - lastEp.startTs;
+    banner.className = "ep-banner active";
+    dot.className    = "bn-dot a";
+    title.textContent = "🤒 Episod activ de febră";
+    sub.textContent   = "A început acum " + fmtElapsed(duration);
+  } else {
+    // Last episode is done
+    const duration = lastEp.lastTs - lastEp.startTs;
+    banner.className = "ep-banner done";
+    dot.className    = "bn-dot d";
+    title.textContent = "✅ Fără febră";
+    if (duration < 60_000) {
+      sub.textContent = "Ultimul episod a durat mai puțin de un minut";
+    } else {
+      sub.textContent = "Ultimul episod a durat " + fmtElapsed(duration);
+    }
+  }
+}
+
 function refresh() {
   updateCard("ibu",  lastIbu);
   updateCard("para", lastPara);
+  updateEpisodeBanner();
 }
 
 // ── FIREBASE LISTENERS ───────────────────────────
@@ -659,6 +723,7 @@ onSnapshot(histQ, snap => {
   });
   renderHistory();
   if (activeTab === 'stat') renderStats();
+  updateEpisodeBanner();
 });
 
 // ── ONLINE/OFFLINE ───────────────────────────────
